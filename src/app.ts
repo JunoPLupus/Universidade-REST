@@ -2,6 +2,7 @@ import express, { Application } from 'express';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './shared/swagger';
+import { errorHandler } from './http/middlewares/error-handler/error-handler.middleware';
 
 export function createApp(): Application {
   const app = express();
@@ -21,9 +22,8 @@ export function createApp(): Application {
   // app.use('/cursos', cursoRoutes);
   // app.use('/disciplinas', disciplinaRoutes);
 
-  // TODO: registrar o middleware global de tratamento de erros
-  // (deve ser o último a ser registrado)
-  // app.use(errorHandler);
+  // Middleware global de tratamento de erros (deve ser o último a ser registrado)
+  app.use(errorHandler);
 
   return app;
 }
