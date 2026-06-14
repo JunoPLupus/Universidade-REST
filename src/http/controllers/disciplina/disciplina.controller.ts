@@ -141,4 +141,17 @@ export class DisciplinaController {
 
     res.status(204).send()
   }
+
+  /**
+   * Remove todas as disciplinas vinculadas ao curso informado.
+   *
+   * @param req.params.codigo - Código do curso cujas disciplinas serão removidas.
+   * @returns 204 sem corpo.
+   * @throws ErroNaoEncontrado (404) se não existir curso com o código informado.
+   */
+  async excluirPorCurso(req: Request, res: Response): Promise<void> {
+    await this.disciplinaService.excluirPorCurso(req.params.codigo as string)
+
+    res.status(204).send()
+  }
 }

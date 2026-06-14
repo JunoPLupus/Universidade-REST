@@ -20,6 +20,7 @@ describe('Disciplina Controller - Testes unitários', () => {
       cadastrar: jest.fn(),
       editar: jest.fn(),
       excluir: jest.fn(),
+      excluirPorCurso: jest.fn(),
     } as unknown as jest.Mocked<DisciplinaService>
 
     cursoService = {
@@ -146,6 +147,20 @@ describe('Disciplina Controller - Testes unitários', () => {
       await controller.excluir(req, res)
 
       expect(disciplinaService.excluir).toHaveBeenCalledWith('001.001')
+      expect(res.status).toHaveBeenCalledWith(204)
+      expect(res.send).toHaveBeenCalled()
+    })
+  })
+
+  describe('excluirPorCurso', () => {
+    it('deve retornar 204 sem corpo', async () => {
+      disciplinaService.excluirPorCurso.mockResolvedValue(undefined)
+
+      const req = { params: { codigo: '001' } } as unknown as Request
+
+      await controller.excluirPorCurso(req, res)
+
+      expect(disciplinaService.excluirPorCurso).toHaveBeenCalledWith('001')
       expect(res.status).toHaveBeenCalledWith(204)
       expect(res.send).toHaveBeenCalled()
     })

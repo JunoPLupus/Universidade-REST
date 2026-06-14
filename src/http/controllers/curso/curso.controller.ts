@@ -83,6 +83,7 @@ export class CursoController {
    * @param req.params.codigo - Código do curso a ser removido.
    * @returns 204 sem corpo.
    * @throws ErroNaoEncontrado (404) se o curso não existir.
+   * @throws ErroConflito (409) se existirem disciplinas vinculadas ao curso.
    */
   async excluir(req: Request, res: Response): Promise<void> {
     await this.cursoService.excluir(req.params.codigo as string)
