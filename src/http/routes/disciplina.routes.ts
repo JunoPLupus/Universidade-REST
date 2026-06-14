@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { disciplinaController } from '../../shared/container';
 
-const disciplinaRoutes = Router()
+const disciplinaRoutes : Router = Router()
 
 disciplinaRoutes.get('/', disciplinaController.buscar.bind(disciplinaController))
 disciplinaRoutes.get('/:codigo', disciplinaController.buscarPorCodigo.bind(disciplinaController))
