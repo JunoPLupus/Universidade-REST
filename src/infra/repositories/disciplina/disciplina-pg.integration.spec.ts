@@ -154,4 +154,17 @@ describe('Implementação PostgreSQL de Disciplina Repository - Testes de integr
       expect(encontrada).toBeNull()
     })
   })
+
+  describe('excluirPorCurso', () => {
+    it('remove todas as disciplinas vinculadas ao curso informado', async () => {
+      const codCurso = CursoMother.props().codigo
+      await repository.cadastrar(DisciplinaMother.criar({ codigo: `${codCurso}.001`, nome: 'Cálculo I' }))
+      await repository.cadastrar(DisciplinaMother.criar({ codigo: `${codCurso}.002`, nome: 'Álgebra Linear' }))
+
+      await repository.excluirPorCurso(codCurso)
+
+      const disciplinas = await repository.buscar({ codCurso })
+      expect(disciplinas).toHaveLength(0)
+    })
+  })
 })

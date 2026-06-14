@@ -1,5 +1,7 @@
 import { Curso } from '../entities/curso/curso.entity';
+import { Disciplina } from "../entities/disciplina/disciplina.entity";
 import { BuscarCursoFiltros, ICursoRepository } from '../repositories/curso.repository';
+import { IDisciplinaRepository } from '../repositories/disciplina.repository';
 import { ErroConflito } from '../errors/erro-conflito';
 import { CursoCadastroDTO } from './curso-cadastro.dto';
 import { CursoEdicaoDTO } from './curso-edicao.dto';
@@ -16,7 +18,10 @@ import { garantirExistencia } from './utils/garantir-existencia.util';
  * em `Curso.criar`.
  */
 export class CursoService {
-  constructor(private readonly cursoRepository: ICursoRepository) {}
+  constructor(
+    private readonly cursoRepository: ICursoRepository,
+    private readonly disciplinaRepository: IDisciplinaRepository,
+  ) {}
 
   /**
    * Cadastra um novo curso.
@@ -29,25 +34,25 @@ export class CursoService {
    * invariantes da entidade `Curso`.
    */
   async cadastrar(dto: CursoCadastroDTO): Promise<Curso> {
-    const nome = dto.nome.trim();
-    const cursoExistente = await this.cursoRepository.buscarPorNome(nome);
+    const nome = dto.nome.trim()
+    const cursoExistente = await this.cursoRepository.buscarPorNome(nome)
 
     if (cursoExistente) {
-      throw new ErroConflito(`Já existe um curso cadastrado com o nome "${nome}".`);
+      throw new ErroConflito(`Já existe um curso cadastrado com o nome "${nome}".`)
     }
 
-    const ultimoCodigo = await this.cursoRepository.buscarUltimoCodigo();
-    const codigo = gerarProximoCodigo(ultimoCodigo);
+    const ultimoCodigo = await this.cursoRepository.buscarUltimoCodigo()
+    const codigo = gerarProximoCodigo(ultimoCodigo)
 
-    const curso = Curso.criar({ codigo, nome: dto.nome, periodos: dto.periodos });
-    await this.cursoRepository.cadastrar(curso);
+    const curso : Curso = Curso.criar({ codigo, nome: dto.nome, periodos: dto.periodos })
+    await this.cursoRepository.cadastrar(curso)
 
-    return curso;
+    return curso
   }
 
   /** Busca cursos pelos filtros informados (todos opcionais; sem filtros, retorna todos). */
   async buscar(filtros: BuscarCursoFiltros): Promise<Curso[]> {
-    return this.cursoRepository.buscar(filtros);
+    return this.cursoRepository.buscar(filtros)
   }
 
   /**
@@ -59,7 +64,7 @@ export class CursoService {
     return garantirExistencia(
       () => this.cursoRepository.buscarPorCodigo(codigo),
       `Curso com código "${codigo}" não encontrado.`,
-    );
+    )
   }
 
   /**
@@ -71,28 +76,36 @@ export class CursoService {
    * invariantes da entidade `Curso`.
    */
   async editar(codigo: string, dto: CursoEdicaoDTO): Promise<Curso> {
-    await this.buscarPorCodigo(codigo);
+    await this.buscarPorCodigo(codigo)
 
-    const nome = dto.nome.trim();
-    const cursoComMesmoNome = await this.cursoRepository.buscarPorNome(nome);
+    const nome = dto.nome.trim()
+    const cursoComMesmoNome = await this.cursoRepository.buscarPorNome(nome)
 
     if (cursoComMesmoNome && cursoComMesmoNome.codigo !== codigo) {
-      throw new ErroConflito(`Já existe um curso cadastrado com o nome "${nome}".`);
+      throw new ErroConflito(`Já existe um curso cadastrado com o nome "${nome}".`)
     }
 
-    const cursoAtualizado = Curso.criar({ codigo, nome: dto.nome, periodos: dto.periodos });
-    await this.cursoRepository.editar(cursoAtualizado);
+    const cursoAtualizado : Curso = Curso.criar({ codigo, nome: dto.nome, periodos: dto.periodos })
+    await this.cursoRepository.editar(cursoAtualizado)
 
-    return cursoAtualizado;
+    return cursoAtualizado
   }
 
   /**
    * Remove um curso pelo código.
    *
    * @throws ErroNaoEncontrado se não existir curso com o código informado.
+   * @throws ErroConflito se existirem disciplinas vinculadas ao curso.
    */
   async excluir(codigo: string): Promise<void> {
-    await this.buscarPorCodigo(codigo);
-    await this.cursoRepository.excluir(codigo);
+    await this.buscarPorCodigo(codigo)
+
+    const disciplinasVinculadas : Disciplina[] = await this.disciplinaRepository.buscar({ codCurso: codigo })
+
+    if (disciplinasVinculadas.length > 0) {
+      throw new ErroConflito('Não é possível excluir um curso que possui disciplinas cadastradas.')
+    }
+
+    await this.cursoRepository.excluir(codigo)
   }
 }

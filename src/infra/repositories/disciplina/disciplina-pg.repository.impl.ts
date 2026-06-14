@@ -77,4 +77,8 @@ export class DisciplinaPgRepositoryImpl implements IDisciplinaRepository {
   async excluir(codigo: string): Promise<void> {
     await this.prisma.disciplina.delete({ where: { codigo } })
   }
+
+  async excluirPorCurso(codCurso: string): Promise<void> {
+    await this.prisma.disciplina.deleteMany({ where: { codCurso } })
+  }
 }
