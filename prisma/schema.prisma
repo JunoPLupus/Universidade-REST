@@ -7,5 +7,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Os models (Curso, Disciplina, Semestre, Professor, Admin, Lecionamento, ...)
+// Os models (Semestre, Professor, Admin, Lecionamento, ...)
 // serão adicionados aqui conforme as entidades forem implementadas.
+
+model Curso {
+  codigo   String @id
+  nome     String @unique
+  periodos Int
+
+  disciplinas Disciplina[]
+
+  @@map("curso")
+}
+
+model Disciplina {
+  codigo       String @id
+  codCurso     String @map("cod_curso")
+  periodo      Int
+  nome         String
+  cargaHoraria Int    @map("carga_horaria")
+
+  curso Curso @relation(fields: [codCurso], references: [codigo])
+
+  // O nome da disciplina não pode se repetir dentro do mesmo curso.
+  @@unique([codCurso, nome])
+  @@map("disciplina")
+}
