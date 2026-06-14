@@ -44,14 +44,39 @@ describe('Disciplina Controller - Testes unitários', () => {
       const disciplina = DisciplinaMother.criar()
       disciplinaService.buscar.mockResolvedValue([disciplina])
 
-      const req = { query: { nome: 'Cálculo', codCurso: '001', codigo: '001.001' } } as unknown as Request
+      const req = {
+        query: { nome: 'Cálculo', codCurso: '001', codigo: '001.001', cargaHoraria: '60', periodo: '3' },
+      } as unknown as Request
 
       await controller.buscar(req, res)
 
-      expect(disciplinaService.buscar).toHaveBeenCalledWith({ nome: 'Cálculo', codCurso: '001', codigo: '001.001' })
+      expect(disciplinaService.buscar).toHaveBeenCalledWith({
+        nome: 'Cálculo',
+        codCurso: '001',
+        codigo: '001.001',
+        cargaHoraria: 60,
+        periodo: 3,
+      })
       expect(cursoService.buscarPorCodigo).toHaveBeenCalledWith(disciplina.codCurso)
       expect(res.status).toHaveBeenCalledWith(200)
       expect(res.json).toHaveBeenCalledWith([DisciplinaRespostaMapper.paraResposta(disciplina, curso)])
+    })
+
+    it('trata cargaHoraria/periodo inválidos ou ausentes na query como filtro não informado', async () => {
+      const disciplina = DisciplinaMother.criar()
+      disciplinaService.buscar.mockResolvedValue([disciplina])
+
+      const req = { query: { cargaHoraria: 'abc', periodo: 'xyz' } } as unknown as Request
+
+      await controller.buscar(req, res)
+
+      expect(disciplinaService.buscar).toHaveBeenCalledWith({
+        nome: undefined,
+        codCurso: undefined,
+        codigo: undefined,
+        cargaHoraria: undefined,
+        periodo: undefined,
+      })
     })
   })
 

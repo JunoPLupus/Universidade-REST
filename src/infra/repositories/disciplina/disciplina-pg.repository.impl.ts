@@ -24,6 +24,14 @@ export class DisciplinaPgRepositoryImpl implements IDisciplinaRepository {
       where.codigo = filtros.codigo
     }
 
+    if (filtros.cargaHoraria !== undefined) {
+      where.cargaHoraria = filtros.cargaHoraria
+    }
+
+    if (filtros.periodo !== undefined) {
+      where.periodo = filtros.periodo
+    }
+
     const registros = await this.prisma.disciplina.findMany({
       where,
       orderBy: { codigo: "asc" },

@@ -4,6 +4,8 @@ export interface BuscarDisciplinaFiltros {
   nome?: string;
   codCurso?: string;
   codigo?: string;
+  cargaHoraria?: number;
+  periodo?: number;
 }
 
 export interface IDisciplinaRepository {

@@ -114,6 +114,16 @@ describe('Disciplina Service - Testes unitários', () => {
       expect(resultado).toBe(disciplinas);
       expect(disciplinaRepository.buscar).toHaveBeenCalledWith({ codCurso: '001' });
     });
+
+    it('delega a busca para o repositório incluindo os filtros de cargaHoraria e periodo', async () => {
+      const disciplinas = [DisciplinaMother.criar()];
+      disciplinaRepository.buscar.mockResolvedValue(disciplinas);
+
+      const resultado = await service.buscar({ cargaHoraria: 60, periodo: 3 });
+
+      expect(resultado).toBe(disciplinas);
+      expect(disciplinaRepository.buscar).toHaveBeenCalledWith({ cargaHoraria: 60, periodo: 3 });
+    });
   });
 
   describe('buscarPorCodigo', () => {

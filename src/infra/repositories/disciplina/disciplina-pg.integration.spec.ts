@@ -105,6 +105,24 @@ describe('Implementação PostgreSQL de Disciplina Repository - Testes de integr
       expect(disciplinas).toHaveLength(1)
       expect(disciplinas[0].nome).toBe('Álgebra Linear')
     })
+
+    it('filtra por carga horária exata', async () => {
+      await repository.cadastrar(DisciplinaMother.criar({ codigo: `${codCurso}.003`, nome: 'Física I', cargaHoraria: 80 }))
+
+      const disciplinas = await repository.buscar({ cargaHoraria: 80 })
+
+      expect(disciplinas).toHaveLength(1)
+      expect(disciplinas[0].nome).toBe('Física I')
+    })
+
+    it('filtra por período exato', async () => {
+      await repository.cadastrar(DisciplinaMother.criar({ codigo: `${codCurso}.003`, nome: 'Física I', periodo: 5 }))
+
+      const disciplinas = await repository.buscar({ periodo: 5 })
+
+      expect(disciplinas).toHaveLength(1)
+      expect(disciplinas[0].nome).toBe('Física I')
+    })
   })
 
   describe('editar', () => {

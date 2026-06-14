@@ -41,21 +41,48 @@ export class DisciplinaController {
   }
 
   /**
+   * Converte um valor de query string para `string`, retornando `undefined`
+   * caso o valor não tenha sido informado (ou não seja uma string).
+   */
+  private paraFiltroString(valor: unknown): string | undefined {
+    return typeof valor === 'string' ? valor : undefined
+  }
+
+  /**
+   * Converte um valor de query string para `number`, retornando `undefined`
+   * caso o valor não tenha sido informado ou não represente um número válido.
+   */
+  private paraFiltroNumerico(valor: unknown): number | undefined {
+    if (typeof valor !== 'string') {
+      return undefined
+    }
+
+    const numero = Number(valor)
+
+    return Number.isNaN(numero) ? undefined : numero
+  }
+
+  /**
    * Lista disciplinas, opcionalmente filtrando por `nome` (busca parcial),
-   * `codCurso` e/ou `codigo` (exatos), informados via query string.
+   * `codCurso`, `codigo`, `cargaHoraria` e/ou `periodo` (exatos), informados
+   * via query string.
    *
    * @param req.query.nome - Filtro opcional por parte do nome da disciplina.
    * @param req.query.codCurso - Filtro opcional pelo código do curso ao qual a disciplina pertence.
    * @param req.query.codigo - Filtro opcional pelo código exato da disciplina.
+   * @param req.query.cargaHoraria - Filtro opcional pela carga horária exata da disciplina.
+   * @param req.query.periodo - Filtro opcional pelo período exato da disciplina.
    * @returns 200 com a lista de disciplinas no formato `DisciplinaRespostaDTO[]`.
    */
   async buscar(req: Request, res: Response): Promise<void> {
-    const { nome, codCurso, codigo } = req.query
+    const { nome, codCurso, codigo, cargaHoraria, periodo } = req.query
 
     const disciplinas : Disciplina[] = await this.disciplinaService.buscar({
-      nome: typeof nome === 'string' ? nome : undefined,
-      codCurso: typeof codCurso === 'string' ? codCurso : undefined,
-      codigo: typeof codigo === 'string' ? codigo : undefined,
+      nome: this.paraFiltroString(nome),
+      codCurso: this.paraFiltroString(codCurso),
+      codigo: this.paraFiltroString(codigo),
+      cargaHoraria: this.paraFiltroNumerico(cargaHoraria),
+      periodo: this.paraFiltroNumerico(periodo),
     })
 
     const resposta = await Promise.all(disciplinas.map((disciplina) => this.paraResposta(disciplina)))
