@@ -13,7 +13,7 @@ export class CursoMapper {
       codigo: raw.codigo,
       nome: raw.nome,
       periodos: raw.periodos,
-    });
+    })
   }
 
   /** Converte a entidade de domínio para o formato aceito pelo Prisma. */
@@ -22,6 +22,6 @@ export class CursoMapper {
       codigo: curso.codigo,
       nome: curso.nome,
       periodos: curso.periodos,
-    };
+    }
   }
 }

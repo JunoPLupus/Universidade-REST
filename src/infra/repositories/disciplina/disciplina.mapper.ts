@@ -15,7 +15,7 @@ export class DisciplinaMapper {
       periodo: raw.periodo,
       nome: raw.nome,
       cargaHoraria: raw.cargaHoraria,
-    });
+    })
   }
 
   /** Converte a entidade de domínio para o formato aceito pelo Prisma. */
@@ -26,6 +26,6 @@ export class DisciplinaMapper {
       periodo: disciplina.periodo,
       nome: disciplina.nome,
       cargaHoraria: disciplina.cargaHoraria,
-    };
+    }
   }
 }
