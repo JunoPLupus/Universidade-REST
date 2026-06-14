@@ -10,7 +10,7 @@
     "dev": "nodemon --exec ts-node src/server.ts",
     "test": "jest",
     "test:unit": "jest --testPathPattern=unit",
-    "test:integration": "jest --testPathPattern=integration",
+    "test:integration": "jest --testPathPattern=integration --runInBand",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio"
