@@ -1,14 +1,14 @@
-import { DomainError } from '../../errors/domain-error';
+import { ErroNaoEncontrado } from '../../errors/erro-nao-encontrado';
 
 /**
- * Busca uma entidade e lança um `DomainError` caso ela não seja encontrada.
+ * Busca uma entidade e lança um `ErroNaoEncontrado` caso ela não seja encontrada.
  *
  * Centraliza o padrão "buscar ou falhar" usado pelos services antes de
  * retornar, editar ou excluir uma entidade identificada por código.
  *
  * @param buscar Função que busca a entidade, retornando `null` se ela não existir.
- * @param mensagemErro Mensagem do `DomainError` lançado caso `buscar` retorne `null`.
- * @throws DomainError se `buscar` retornar `null`.
+ * @param mensagemErro Mensagem do `ErroNaoEncontrado` lançado caso `buscar` retorne `null`.
+ * @throws ErroNaoEncontrado se `buscar` retornar `null`.
  */
 export async function garantirExistencia<T>(
   buscar: () => Promise<T | null>,
@@ -17,7 +17,7 @@ export async function garantirExistencia<T>(
   const entidade = await buscar();
 
   if (!entidade) {
-    throw new DomainError(mensagemErro);
+    throw new ErroNaoEncontrado(mensagemErro);
   }
 
   return entidade;

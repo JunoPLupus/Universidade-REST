@@ -1,4 +1,4 @@
-import { DomainError } from '../../errors/domain-error';
+import { ErroValidacao } from '../../errors/erro-validacao';
 import { DisciplinaProps } from './disciplina.props';
 
 /**
@@ -22,22 +22,22 @@ export class Disciplina {
   /**
    * Cria uma instância de Disciplina validando as invariantes do domínio.
    *
-   * @throws DomainError se `nome` for vazio, `periodo` for menor que 3,
+   * @throws ErroValidacao se `nome` for vazio, `periodo` for menor que 3,
    * ou `cargaHoraria` for menor ou igual a zero.
    */
   static criar(props: DisciplinaProps): Disciplina {
     const nome = props.nome.trim();
 
     if (nome.length === 0) {
-      throw new DomainError('O nome da disciplina é obrigatório.');
+      throw new ErroValidacao('O nome da disciplina é obrigatório.');
     }
 
     if (props.periodo < 3) {
-      throw new DomainError('O período da disciplina deve ser no mínimo 3.');
+      throw new ErroValidacao('O período da disciplina deve ser no mínimo 3.');
     }
 
     if (props.cargaHoraria <= 0) {
-      throw new DomainError('A carga horária deve ser maior que zero.');
+      throw new ErroValidacao('A carga horária deve ser maior que zero.');
     }
 
     return new Disciplina(props.codigo, props.codCurso, props.periodo, nome, props.cargaHoraria);

@@ -1,6 +1,6 @@
 import { Curso } from '../entities/curso/curso.entity';
 import { BuscarCursoFiltros, ICursoRepository } from '../repositories/curso.repository';
-import { DomainError } from '../errors/domain-error';
+import { ErroConflito } from '../errors/erro-conflito';
 import { CursoCadastroDTO } from './curso-cadastro.dto';
 import { CursoEdicaoDTO } from './curso-edicao.dto';
 import { gerarProximoCodigo } from './utils/gerar-proximo-codigo.util';
@@ -24,15 +24,16 @@ export class CursoService {
    * Gera o código sequencial automaticamente (`'001'`, `'002'`, ...) e
    * garante que não exista outro curso com o mesmo nome.
    *
-   * @throws DomainError se já existir um curso com o mesmo nome, ou se
-   * `dto.nome`/`dto.periodos` violarem as invariantes da entidade `Curso`.
+   * @throws ErroConflito se já existir um curso com o mesmo nome.
+   * @throws ErroValidacao se `dto.nome`/`dto.periodos` violarem as
+   * invariantes da entidade `Curso`.
    */
   async cadastrar(dto: CursoCadastroDTO): Promise<Curso> {
     const nome = dto.nome.trim();
     const cursoExistente = await this.cursoRepository.buscarPorNome(nome);
 
     if (cursoExistente) {
-      throw new DomainError(`Já existe um curso cadastrado com o nome "${nome}".`);
+      throw new ErroConflito(`Já existe um curso cadastrado com o nome "${nome}".`);
     }
 
     const ultimoCodigo = await this.cursoRepository.buscarUltimoCodigo();
@@ -52,7 +53,7 @@ export class CursoService {
   /**
    * Busca um curso pelo código.
    *
-   * @throws DomainError se não existir curso com o código informado.
+   * @throws ErroNaoEncontrado se não existir curso com o código informado.
    */
   async buscarPorCodigo(codigo: string): Promise<Curso> {
     return garantirExistencia(
@@ -64,8 +65,9 @@ export class CursoService {
   /**
    * Edita os dados de um curso existente.
    *
-   * @throws DomainError se o curso não existir, se o novo nome já estiver em
-   * uso por outro curso, ou se `dto.nome`/`dto.periodos` violarem as
+   * @throws ErroNaoEncontrado se o curso não existir.
+   * @throws ErroConflito se o novo nome já estiver em uso por outro curso.
+   * @throws ErroValidacao se `dto.nome`/`dto.periodos` violarem as
    * invariantes da entidade `Curso`.
    */
   async editar(codigo: string, dto: CursoEdicaoDTO): Promise<Curso> {
@@ -75,7 +77,7 @@ export class CursoService {
     const cursoComMesmoNome = await this.cursoRepository.buscarPorNome(nome);
 
     if (cursoComMesmoNome && cursoComMesmoNome.codigo !== codigo) {
-      throw new DomainError(`Já existe um curso cadastrado com o nome "${nome}".`);
+      throw new ErroConflito(`Já existe um curso cadastrado com o nome "${nome}".`);
     }
 
     const cursoAtualizado = Curso.criar({ codigo, nome: dto.nome, periodos: dto.periodos });
@@ -87,7 +89,7 @@ export class CursoService {
   /**
    * Remove um curso pelo código.
    *
-   * @throws DomainError se não existir curso com o código informado.
+   * @throws ErroNaoEncontrado se não existir curso com o código informado.
    */
   async excluir(codigo: string): Promise<void> {
     await this.buscarPorCodigo(codigo);

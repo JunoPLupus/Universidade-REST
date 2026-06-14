@@ -1,4 +1,4 @@
-import { DomainError } from '../../errors/domain-error';
+import { ErroValidacao } from '../../errors/erro-validacao';
 import { CursoProps } from './curso.props';
 
 /**
@@ -19,18 +19,18 @@ export class Curso {
   /**
    * Cria uma instância de Curso validando as invariantes do domínio.
    *
-   * @throws DomainError se `nome` não tiver entre 5 e 100 caracteres,
+   * @throws ErroValidacao se `nome` não tiver entre 5 e 100 caracteres,
    * ou se `periodos` não estiver entre 3 e 12.
    */
   static criar(props: CursoProps): Curso {
     const nome = props.nome.trim();
 
     if (nome.length < 5 || nome.length > 100) {
-      throw new DomainError('O nome do curso deve ter entre 5 e 100 caracteres.');
+      throw new ErroValidacao('O nome do curso deve ter entre 5 e 100 caracteres.');
     }
 
     if (props.periodos < 3 || props.periodos > 12) {
-      throw new DomainError('O curso deve ter entre 3 e 12 períodos.');
+      throw new ErroValidacao('O curso deve ter entre 3 e 12 períodos.');
     }
 
     return new Curso(props.codigo, nome, props.periodos);

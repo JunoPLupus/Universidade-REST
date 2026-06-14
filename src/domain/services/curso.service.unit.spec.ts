@@ -1,6 +1,8 @@
 import { CursoService } from './curso.service';
 import { ICursoRepository } from '../repositories/curso.repository';
-import { DomainError } from '../errors/domain-error';
+import { ErroNaoEncontrado } from '../errors/erro-nao-encontrado';
+import { ErroConflito } from '../errors/erro-conflito';
+import { ErroValidacao } from '../errors/erro-validacao';
 import { CursoMother } from '../../../tests/test-helpers/curso.mother';
 
 describe('Curso Service - Testes unitários', () => {
@@ -41,19 +43,21 @@ describe('Curso Service - Testes unitários', () => {
       expect(curso.codigo).toBe('004');
     });
 
-    it('lança DomainError ao tentar cadastrar um curso com nome já existente', async () => {
+    it('lança ErroConflito ao tentar cadastrar um curso com nome já existente', async () => {
       cursoRepository.buscarPorNome.mockResolvedValue(CursoMother.criar());
 
-      await expect(service.cadastrar({ nome: 'Ciência da Computação', periodos: 8 })).rejects.toThrow(DomainError);
+      await expect(service.cadastrar({ nome: 'Ciência da Computação', periodos: 8 })).rejects.toThrow(
+        ErroConflito,
+      );
 
       expect(cursoRepository.cadastrar).not.toHaveBeenCalled();
     });
 
-    it('propaga o DomainError lançado pela entidade quando os dados são inválidos', async () => {
+    it('propaga o ErroValidacao lançado pela entidade quando os dados são inválidos', async () => {
       cursoRepository.buscarPorNome.mockResolvedValue(null);
       cursoRepository.buscarUltimoCodigo.mockResolvedValue(null);
 
-      await expect(service.cadastrar({ nome: 'abc', periodos: 8 })).rejects.toThrow(DomainError);
+      await expect(service.cadastrar({ nome: 'abc', periodos: 8 })).rejects.toThrow(ErroValidacao);
 
       expect(cursoRepository.cadastrar).not.toHaveBeenCalled();
     });
@@ -81,10 +85,10 @@ describe('Curso Service - Testes unitários', () => {
       expect(resultado).toBe(curso);
     });
 
-    it('lança DomainError quando o curso não existe', async () => {
+    it('lança ErroNaoEncontrado quando o curso não existe', async () => {
       cursoRepository.buscarPorCodigo.mockResolvedValue(null);
 
-      await expect(service.buscarPorCodigo('999')).rejects.toThrow(DomainError);
+      await expect(service.buscarPorCodigo('999')).rejects.toThrow(ErroNaoEncontrado);
     });
   });
 
@@ -104,13 +108,15 @@ describe('Curso Service - Testes unitários', () => {
       expect(cursoRepository.editar).toHaveBeenCalledWith(atualizado);
     });
 
-    it('lança DomainError ao editar um curso que não existe', async () => {
+    it('lança ErroNaoEncontrado ao editar um curso que não existe', async () => {
       cursoRepository.buscarPorCodigo.mockResolvedValue(null);
 
-      await expect(service.editar('999', { nome: 'Curso Inexistente', periodos: 8 })).rejects.toThrow(DomainError);
+      await expect(service.editar('999', { nome: 'Curso Inexistente', periodos: 8 })).rejects.toThrow(
+        ErroNaoEncontrado,
+      );
     });
 
-    it('lança DomainError ao tentar renomear para um nome já usado por outro curso', async () => {
+    it('lança ErroConflito ao tentar renomear para um nome já usado por outro curso', async () => {
       const curso = CursoMother.criar({ codigo: '001' });
       const outroCurso = CursoMother.criar({ codigo: '002', nome: 'Engenharia de Software' });
 
@@ -118,7 +124,7 @@ describe('Curso Service - Testes unitários', () => {
       cursoRepository.buscarPorNome.mockResolvedValue(outroCurso);
 
       await expect(service.editar(curso.codigo, { nome: 'Engenharia de Software', periodos: 8 })).rejects.toThrow(
-        DomainError,
+        ErroConflito,
       );
 
       expect(cursoRepository.editar).not.toHaveBeenCalled();
@@ -146,10 +152,10 @@ describe('Curso Service - Testes unitários', () => {
       expect(cursoRepository.excluir).toHaveBeenCalledWith(curso.codigo);
     });
 
-    it('lança DomainError ao excluir um curso que não existe', async () => {
+    it('lança ErroNaoEncontrado ao excluir um curso que não existe', async () => {
       cursoRepository.buscarPorCodigo.mockResolvedValue(null);
 
-      await expect(service.excluir('999')).rejects.toThrow(DomainError);
+      await expect(service.excluir('999')).rejects.toThrow(ErroNaoEncontrado);
 
       expect(cursoRepository.excluir).not.toHaveBeenCalled();
     });

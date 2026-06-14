@@ -1,7 +1,9 @@
 import { DisciplinaService } from './disciplina.service';
 import { IDisciplinaRepository } from '../repositories/disciplina.repository';
 import { ICursoRepository } from '../repositories/curso.repository';
-import { DomainError } from '../errors/domain-error';
+import { ErroNaoEncontrado } from '../errors/erro-nao-encontrado';
+import { ErroConflito } from '../errors/erro-conflito';
+import { ErroValidacao } from '../errors/erro-validacao';
 import { CursoMother } from '../../../tests/test-helpers/curso.mother';
 import { DisciplinaMother } from '../../../tests/test-helpers/disciplina.mother';
 
@@ -68,35 +70,35 @@ describe('Disciplina Service - Testes unitários', () => {
       expect(disciplina.codigo).toBe('001.003');
     });
 
-    it('lança DomainError quando o curso informado não existe', async () => {
+    it('lança ErroNaoEncontrado quando o curso informado não existe', async () => {
       cursoRepository.buscarPorCodigo.mockResolvedValue(null);
 
       await expect(
         service.cadastrar({ codCurso: '999', periodo: 3, nome: 'Cálculo I', cargaHoraria: 60 }),
-      ).rejects.toThrow(DomainError);
+      ).rejects.toThrow(ErroNaoEncontrado);
 
       expect(disciplinaRepository.cadastrar).not.toHaveBeenCalled();
     });
 
-    it('lança DomainError quando o período excede o total de períodos do curso', async () => {
+    it('lança ErroValidacao quando o período excede o total de períodos do curso', async () => {
       const curso = CursoMother.criar({ codigo: '001', periodos: 4 });
       cursoRepository.buscarPorCodigo.mockResolvedValue(curso);
 
       await expect(
         service.cadastrar({ codCurso: '001', periodo: 5, nome: 'Cálculo I', cargaHoraria: 60 }),
-      ).rejects.toThrow(DomainError);
+      ).rejects.toThrow(ErroValidacao);
 
       expect(disciplinaRepository.cadastrar).not.toHaveBeenCalled();
     });
 
-    it('lança DomainError ao cadastrar uma disciplina com nome já usado no mesmo curso', async () => {
+    it('lança ErroConflito ao cadastrar uma disciplina com nome já usado no mesmo curso', async () => {
       const curso = CursoMother.criar({ codigo: '001', periodos: 8 });
       cursoRepository.buscarPorCodigo.mockResolvedValue(curso);
       disciplinaRepository.buscarPorNomeECurso.mockResolvedValue(DisciplinaMother.criar());
 
       await expect(
         service.cadastrar({ codCurso: '001', periodo: 3, nome: 'Cálculo I', cargaHoraria: 60 }),
-      ).rejects.toThrow(DomainError);
+      ).rejects.toThrow(ErroConflito);
 
       expect(disciplinaRepository.cadastrar).not.toHaveBeenCalled();
     });
@@ -124,10 +126,10 @@ describe('Disciplina Service - Testes unitários', () => {
       expect(resultado).toBe(disciplina);
     });
 
-    it('lança DomainError quando a disciplina não existe', async () => {
+    it('lança ErroNaoEncontrado quando a disciplina não existe', async () => {
       disciplinaRepository.buscarPorCodigo.mockResolvedValue(null);
 
-      await expect(service.buscarPorCodigo('999.999')).rejects.toThrow(DomainError);
+      await expect(service.buscarPorCodigo('999.999')).rejects.toThrow(ErroNaoEncontrado);
     });
   });
 
@@ -152,15 +154,15 @@ describe('Disciplina Service - Testes unitários', () => {
       expect(disciplinaRepository.editar).toHaveBeenCalledWith(atualizada);
     });
 
-    it('lança DomainError ao editar uma disciplina que não existe', async () => {
+    it('lança ErroNaoEncontrado ao editar uma disciplina que não existe', async () => {
       disciplinaRepository.buscarPorCodigo.mockResolvedValue(null);
 
       await expect(
         service.editar('999.999', { periodo: 3, nome: 'Inexistente', cargaHoraria: 60 }),
-      ).rejects.toThrow(DomainError);
+      ).rejects.toThrow(ErroNaoEncontrado);
     });
 
-    it('lança DomainError quando o novo período excede o total de períodos do curso', async () => {
+    it('lança ErroValidacao quando o novo período excede o total de períodos do curso', async () => {
       const disciplina = DisciplinaMother.criar();
       const curso = CursoMother.criar({ codigo: disciplina.codCurso, periodos: 4 });
 
@@ -169,12 +171,12 @@ describe('Disciplina Service - Testes unitários', () => {
 
       await expect(
         service.editar(disciplina.codigo, { periodo: 5, nome: disciplina.nome, cargaHoraria: 60 }),
-      ).rejects.toThrow(DomainError);
+      ).rejects.toThrow(ErroValidacao);
 
       expect(disciplinaRepository.editar).not.toHaveBeenCalled();
     });
 
-    it('lança DomainError ao renomear para um nome já usado por outra disciplina do mesmo curso', async () => {
+    it('lança ErroConflito ao renomear para um nome já usado por outra disciplina do mesmo curso', async () => {
       const disciplina = DisciplinaMother.criar({ codigo: '001.001', nome: 'Cálculo I' });
       const outraDisciplina = DisciplinaMother.criar({ codigo: '001.002', nome: 'Álgebra Linear' });
       const curso = CursoMother.criar({ codigo: disciplina.codCurso, periodos: 8 });
@@ -185,7 +187,7 @@ describe('Disciplina Service - Testes unitários', () => {
 
       await expect(
         service.editar(disciplina.codigo, { periodo: 3, nome: 'Álgebra Linear', cargaHoraria: 60 }),
-      ).rejects.toThrow(DomainError);
+      ).rejects.toThrow(ErroConflito);
 
       expect(disciplinaRepository.editar).not.toHaveBeenCalled();
     });
@@ -218,10 +220,10 @@ describe('Disciplina Service - Testes unitários', () => {
       expect(disciplinaRepository.excluir).toHaveBeenCalledWith(disciplina.codigo);
     });
 
-    it('lança DomainError ao excluir uma disciplina que não existe', async () => {
+    it('lança ErroNaoEncontrado ao excluir uma disciplina que não existe', async () => {
       disciplinaRepository.buscarPorCodigo.mockResolvedValue(null);
 
-      await expect(service.excluir('999.999')).rejects.toThrow(DomainError);
+      await expect(service.excluir('999.999')).rejects.toThrow(ErroNaoEncontrado);
 
       expect(disciplinaRepository.excluir).not.toHaveBeenCalled();
     });
