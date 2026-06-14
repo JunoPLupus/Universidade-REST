@@ -10,7 +10,7 @@ import { CursoRespostaMapper } from '../../mappers/curso-resposta.mapper';
  *
  * Apenas traduz requisições/respostas HTTP em chamadas ao `CursoService` —
  * toda a lógica de negócio (validações, geração de código, etc.) fica no
- * service. Erros de domínio lançados pelo service (`ErroDominio` e
+ * service. Erros de domínio lançados pelo service (`ErroDominioError` e
  * subclasses) não são tratados aqui: por serem `async`, qualquer rejeição é
  * encaminhada automaticamente pelo Express 5 ao middleware global de erros
  * (`errorHandler`).

@@ -2,8 +2,8 @@ import { Curso } from "../entities/curso/curso.entity";
 import { Disciplina } from '../entities/disciplina/disciplina.entity';
 import { BuscarDisciplinaFiltros, IDisciplinaRepository } from '../repositories/disciplina.repository';
 import { ICursoRepository } from '../repositories/curso.repository';
-import { ErroConflito } from '../errors/erro-conflito';
-import { ErroValidacao } from '../errors/erro-validacao';
+import { ErroConflitoError } from '../errors/erro-conflito.error';
+import { ErroValidacaoError } from '../errors/erro-validacao.error';
 import { DisciplinaCadastroDTO } from './disciplina-cadastro.dto';
 import { DisciplinaEdicaoDTO } from './disciplina-edicao.dto';
 import { gerarProximoCodigo } from './utils/gerar-proximo-codigo.util';
@@ -33,10 +33,10 @@ export class DisciplinaService {
    * disciplina com o mesmo nome no mesmo curso.
    *
    * @throws ErroNaoEncontrado se o curso não existir.
-   * @throws ErroValidacao se `dto.periodo` exceder o total de períodos do
+   * @throws ErroValidacaoError se `dto.periodo` exceder o total de períodos do
    * curso, ou se os demais campos violarem as invariantes da entidade
    * `Disciplina`.
-   * @throws ErroConflito se já existir uma disciplina com o mesmo nome no curso.
+   * @throws ErroConflitoError se já existir uma disciplina com o mesmo nome no curso.
    */
   async cadastrar(dto: DisciplinaCadastroDTO): Promise<Disciplina> {
     const curso : Curso = await garantirExistencia(
@@ -45,7 +45,7 @@ export class DisciplinaService {
     )
 
     if (dto.periodo > curso.periodos) {
-      throw new ErroValidacao(
+      throw new ErroValidacaoError(
         `O período da disciplina não pode ser maior que o total de períodos do curso (${curso.periodos}).`,
       )
     }
@@ -54,7 +54,7 @@ export class DisciplinaService {
     const disciplinaExistente = await this.disciplinaRepository.buscarPorNomeECurso(nome, dto.codCurso)
 
     if (disciplinaExistente) {
-      throw new ErroConflito(`Já existe uma disciplina chamada "${nome}" cadastrada nesse curso.`)
+      throw new ErroConflitoError(`Já existe uma disciplina chamada "${nome}" cadastrada nesse curso.`)
     }
 
     const ultimoCodigo = await this.disciplinaRepository.buscarUltimoCodigoDoCurso(dto.codCurso)
@@ -95,10 +95,10 @@ export class DisciplinaService {
    * O curso ao qual a disciplina pertence não é alterado.
    *
    * @throws ErroNaoEncontrado se a disciplina não existir.
-   * @throws ErroValidacao se `dto.periodo` exceder o total de períodos do
+   * @throws ErroValidacaoError se `dto.periodo` exceder o total de períodos do
    * curso, ou se os demais campos violarem as invariantes da entidade
    * `Disciplina`.
-   * @throws ErroConflito se o novo nome já estiver em uso por outra
+   * @throws ErroConflitoError se o novo nome já estiver em uso por outra
    * disciplina do mesmo curso.
    */
   async editar(codigo: string, dto: DisciplinaEdicaoDTO): Promise<Disciplina> {
@@ -110,7 +110,7 @@ export class DisciplinaService {
     )
 
     if (dto.periodo > curso.periodos) {
-      throw new ErroValidacao(
+      throw new ErroValidacaoError(
         `O período da disciplina não pode ser maior que o total de períodos do curso (${curso.periodos}).`,
       )
     }
@@ -122,7 +122,7 @@ export class DisciplinaService {
     )
 
     if (disciplinaComMesmoNome && disciplinaComMesmoNome.codigo !== codigo) {
-      throw new ErroConflito(`Já existe uma disciplina chamada "${nome}" cadastrada nesse curso.`)
+      throw new ErroConflitoError(`Já existe uma disciplina chamada "${nome}" cadastrada nesse curso.`)
     }
 
     const disciplinaAtualizada : Disciplina = Disciplina.criar({

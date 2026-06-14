@@ -2,7 +2,7 @@ import { Curso } from '../entities/curso/curso.entity';
 import { Disciplina } from "../entities/disciplina/disciplina.entity";
 import { BuscarCursoFiltros, ICursoRepository } from '../repositories/curso.repository';
 import { IDisciplinaRepository } from '../repositories/disciplina.repository';
-import { ErroConflito } from '../errors/erro-conflito';
+import { ErroConflitoError } from '../errors/erro-conflito.error';
 import { CursoCadastroDTO } from './curso-cadastro.dto';
 import { CursoEdicaoDTO } from './curso-edicao.dto';
 import { gerarProximoCodigo } from './utils/gerar-proximo-codigo.util';
@@ -29,7 +29,7 @@ export class CursoService {
    * Gera o código sequencial automaticamente (`'001'`, `'002'`, ...) e
    * garante que não exista outro curso com o mesmo nome.
    *
-   * @throws ErroConflito se já existir um curso com o mesmo nome.
+   * @throws ErroConflitoError se já existir um curso com o mesmo nome.
    * @throws ErroValidacao se `dto.nome`/`dto.periodos` violarem as
    * invariantes da entidade `Curso`.
    */
@@ -38,7 +38,7 @@ export class CursoService {
     const cursoExistente = await this.cursoRepository.buscarPorNome(nome)
 
     if (cursoExistente) {
-      throw new ErroConflito(`Já existe um curso cadastrado com o nome "${nome}".`)
+      throw new ErroConflitoError(`Já existe um curso cadastrado com o nome "${nome}".`)
     }
 
     const ultimoCodigo = await this.cursoRepository.buscarUltimoCodigo()
@@ -71,7 +71,7 @@ export class CursoService {
    * Edita os dados de um curso existente.
    *
    * @throws ErroNaoEncontrado se o curso não existir.
-   * @throws ErroConflito se o novo nome já estiver em uso por outro curso.
+   * @throws ErroConflitoError se o novo nome já estiver em uso por outro curso.
    * @throws ErroValidacao se `dto.nome`/`dto.periodos` violarem as
    * invariantes da entidade `Curso`.
    */
@@ -82,7 +82,7 @@ export class CursoService {
     const cursoComMesmoNome = await this.cursoRepository.buscarPorNome(nome)
 
     if (cursoComMesmoNome && cursoComMesmoNome.codigo !== codigo) {
-      throw new ErroConflito(`Já existe um curso cadastrado com o nome "${nome}".`)
+      throw new ErroConflitoError(`Já existe um curso cadastrado com o nome "${nome}".`)
     }
 
     const cursoAtualizado : Curso = Curso.criar({ codigo, nome: dto.nome, periodos: dto.periodos })
@@ -95,7 +95,7 @@ export class CursoService {
    * Remove um curso pelo código.
    *
    * @throws ErroNaoEncontrado se não existir curso com o código informado.
-   * @throws ErroConflito se existirem disciplinas vinculadas ao curso.
+   * @throws ErroConflitoError se existirem disciplinas vinculadas ao curso.
    */
   async excluir(codigo: string): Promise<void> {
     await this.buscarPorCodigo(codigo)
@@ -103,7 +103,7 @@ export class CursoService {
     const disciplinasVinculadas : Disciplina[] = await this.disciplinaRepository.buscar({ codCurso: codigo })
 
     if (disciplinasVinculadas.length > 0) {
-      throw new ErroConflito('Não é possível excluir um curso que possui disciplinas cadastradas.')
+      throw new ErroConflitoError('Não é possível excluir um curso que possui disciplinas cadastradas.')
     }
 
     await this.cursoRepository.excluir(codigo)

@@ -16,7 +16,7 @@ import { DisciplinaRespostaMapper } from '../../mappers/disciplina-resposta.mapp
  * incluir o nome do curso (`curso`) no formato de resposta, no lugar do
  * código do curso (`codCurso`).
  *
- * Erros de domínio lançados pelos services (`ErroDominio` e subclasses) não
+ * Erros de domínio lançados pelos services (`ErroDominioError` e subclasses) não
  * são tratados aqui: por serem `async`, qualquer rejeição é encaminhada
  * automaticamente pelo Express 5 ao middleware global de erros
  * (`errorHandler`).

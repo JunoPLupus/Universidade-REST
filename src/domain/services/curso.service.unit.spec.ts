@@ -1,9 +1,9 @@
 import { CursoService } from './curso.service';
 import { ICursoRepository } from '../repositories/curso.repository';
 import { IDisciplinaRepository } from '../repositories/disciplina.repository';
-import { ErroNaoEncontrado } from '../errors/erro-nao-encontrado';
-import { ErroConflito } from '../errors/erro-conflito';
-import { ErroValidacao } from '../errors/erro-validacao';
+import { ErroNaoEncontradoError } from '../errors/erro-nao-encontrado.error';
+import { ErroConflitoError } from '../errors/erro-conflito.error';
+import { ErroValidacaoError } from '../errors/erro-validacao.error';
 import { CursoMother } from '../../../tests/test-helpers/curso.mother';
 import { DisciplinaMother } from '../../../tests/test-helpers/disciplina.mother';
 
@@ -57,21 +57,21 @@ describe('Curso Service - Testes unitários', () => {
       expect(curso.codigo).toBe('004')
     });
 
-    it('lança ErroConflito ao tentar cadastrar um curso com nome já existente', async () => {
+    it('lança ErroConflitoError ao tentar cadastrar um curso com nome já existente', async () => {
       cursoRepository.buscarPorNome.mockResolvedValue(CursoMother.criar())
 
       await expect(service.cadastrar({ nome: 'Ciência da Computação', periodos: 8 })).rejects.toThrow(
-        ErroConflito,
+        ErroConflitoError,
       )
 
       expect(cursoRepository.cadastrar).not.toHaveBeenCalled()
     })
 
-    it('propaga o ErroValidacao lançado pela entidade quando os dados são inválidos', async () => {
+    it('propaga o ErroValidacaoError lançado pela entidade quando os dados são inválidos', async () => {
       cursoRepository.buscarPorNome.mockResolvedValue(null)
       cursoRepository.buscarUltimoCodigo.mockResolvedValue(null)
 
-      await expect(service.cadastrar({ nome: 'abc', periodos: 8 })).rejects.toThrow(ErroValidacao)
+      await expect(service.cadastrar({ nome: 'abc', periodos: 8 })).rejects.toThrow(ErroValidacaoError)
 
       expect(cursoRepository.cadastrar).not.toHaveBeenCalled()
     })
@@ -99,10 +99,10 @@ describe('Curso Service - Testes unitários', () => {
       expect(resultado).toBe(curso)
     })
 
-    it('lança ErroNaoEncontrado quando o curso não existe', async () => {
+    it('lança ErroNaoEncontradoError quando o curso não existe', async () => {
       cursoRepository.buscarPorCodigo.mockResolvedValue(null)
 
-      await expect(service.buscarPorCodigo('999')).rejects.toThrow(ErroNaoEncontrado)
+      await expect(service.buscarPorCodigo('999')).rejects.toThrow(ErroNaoEncontradoError)
     })
   })
 
@@ -122,15 +122,15 @@ describe('Curso Service - Testes unitários', () => {
       expect(cursoRepository.editar).toHaveBeenCalledWith(atualizado)
     })
 
-    it('lança ErroNaoEncontrado ao editar um curso que não existe', async () => {
+    it('lança ErroNaoEncontradoError ao editar um curso que não existe', async () => {
       cursoRepository.buscarPorCodigo.mockResolvedValue(null)
 
       await expect(service.editar('999', { nome: 'Curso Inexistente', periodos: 8 })).rejects.toThrow(
-        ErroNaoEncontrado,
+        ErroNaoEncontradoError,
       )
     })
 
-    it('lança ErroConflito ao tentar renomear para um nome já usado por outro curso', async () => {
+    it('lança ErroConflitoError ao tentar renomear para um nome já usado por outro curso', async () => {
       const curso = CursoMother.criar({ codigo: '001' })
       const outroCurso = CursoMother.criar({ codigo: '002', nome: 'Engenharia de Software' })
 
@@ -138,7 +138,7 @@ describe('Curso Service - Testes unitários', () => {
       cursoRepository.buscarPorNome.mockResolvedValue(outroCurso)
 
       await expect(service.editar(curso.codigo, { nome: 'Engenharia de Software', periodos: 8 })).rejects.toThrow(
-        ErroConflito,
+        ErroConflitoError,
       )
 
       expect(cursoRepository.editar).not.toHaveBeenCalled()
@@ -167,20 +167,20 @@ describe('Curso Service - Testes unitários', () => {
       expect(cursoRepository.excluir).toHaveBeenCalledWith(curso.codigo)
     })
 
-    it('lança ErroNaoEncontrado ao excluir um curso que não existe', async () => {
+    it('lança ErroNaoEncontradoError ao excluir um curso que não existe', async () => {
       cursoRepository.buscarPorCodigo.mockResolvedValue(null)
 
-      await expect(service.excluir('999')).rejects.toThrow(ErroNaoEncontrado)
+      await expect(service.excluir('999')).rejects.toThrow(ErroNaoEncontradoError)
 
       expect(cursoRepository.excluir).not.toHaveBeenCalled()
     })
 
-    it('lança ErroConflito ao excluir um curso que possui disciplinas cadastradas', async () => {
+    it('lança ErroConflitoError ao excluir um curso que possui disciplinas cadastradas', async () => {
       const curso = CursoMother.criar()
       cursoRepository.buscarPorCodigo.mockResolvedValue(curso)
       disciplinaRepository.buscar.mockResolvedValue([DisciplinaMother.criar()])
 
-      await expect(service.excluir(curso.codigo)).rejects.toThrow(ErroConflito)
+      await expect(service.excluir(curso.codigo)).rejects.toThrow(ErroConflitoError)
 
       expect(cursoRepository.excluir).not.toHaveBeenCalled()
     })

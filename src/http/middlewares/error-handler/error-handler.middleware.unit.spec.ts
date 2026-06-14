@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { errorHandler } from './error-handler.middleware';
-import { ErroNaoEncontrado } from '../../../domain/errors/erro-nao-encontrado';
-import { ErroConflito } from '../../../domain/errors/erro-conflito';
-import { ErroValidacao } from '../../../domain/errors/erro-validacao';
+import { ErroNaoEncontradoError } from '../../../domain/errors/erro-nao-encontrado.error';
+import { ErroConflitoError } from '../../../domain/errors/erro-conflito.error';
+import { ErroValidacaoError } from '../../../domain/errors/erro-validacao.error';
 
 describe('Error Handler Middleware - Testes unitários', () => {
   let req: Request;
@@ -18,8 +18,8 @@ describe('Error Handler Middleware - Testes unitários', () => {
     next = jest.fn();
   });
 
-  it('responde com 404 e a mensagem do erro quando recebe um ErroNaoEncontrado', () => {
-    const erro = new ErroNaoEncontrado('Curso não encontrado.');
+  it('responde com 404 e a mensagem do erro quando recebe um ErroNaoEncontradoError', () => {
+    const erro = new ErroNaoEncontradoError('Curso não encontrado.');
 
     errorHandler(erro, req, res, next);
 
@@ -27,8 +27,8 @@ describe('Error Handler Middleware - Testes unitários', () => {
     expect(res.json).toHaveBeenCalledWith({ mensagem: 'Curso não encontrado.' });
   });
 
-  it('responde com 409 e a mensagem do erro quando recebe um ErroConflito', () => {
-    const erro = new ErroConflito('Já existe um curso com esse nome.');
+  it('responde com 409 e a mensagem do erro quando recebe um ErroConflitoError', () => {
+    const erro = new ErroConflitoError('Já existe um curso com esse nome.');
 
     errorHandler(erro, req, res, next);
 
@@ -36,8 +36,8 @@ describe('Error Handler Middleware - Testes unitários', () => {
     expect(res.json).toHaveBeenCalledWith({ mensagem: 'Já existe um curso com esse nome.' });
   });
 
-  it('responde com 400 e a mensagem do erro quando recebe um ErroValidacao', () => {
-    const erro = new ErroValidacao('O nome do curso deve ter entre 5 e 100 caracteres.');
+  it('responde com 400 e a mensagem do erro quando recebe um ErroValidacaoError', () => {
+    const erro = new ErroValidacaoError('O nome do curso deve ter entre 5 e 100 caracteres.');
 
     errorHandler(erro, req, res, next);
 

@@ -1,4 +1,4 @@
-import { ErroDominio } from './erro-dominio';
+import { ErroDominioError } from './erro-dominio.error';
 
 /**
  * Erro lançado quando os dados informados violam uma invariante de domínio
@@ -6,6 +6,6 @@ import { ErroDominio } from './erro-dominio';
  *
  * Mapeado pelo middleware global de erros para HTTP 400 (Bad Request).
  */
-export class ErroValidacao extends ErroDominio {
+export class ErroValidacaoError extends ErroDominioError {
   readonly statusCode = 400;
 }

@@ -1,4 +1,4 @@
-import { ErroDominio } from './erro-dominio';
+import { ErroDominioError } from './erro-dominio.error';
 
 /**
  * Erro lançado quando uma operação viola uma restrição de unicidade
@@ -6,6 +6,6 @@ import { ErroDominio } from './erro-dominio';
  *
  * Mapeado pelo middleware global de erros para HTTP 409 (Conflict).
  */
-export class ErroConflito extends ErroDominio {
+export class ErroConflitoError extends ErroDominioError {
   readonly statusCode = 409;
 }
