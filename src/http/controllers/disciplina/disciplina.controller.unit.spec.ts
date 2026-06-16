@@ -5,6 +5,7 @@ import { CursoService } from '../../../domain/services/curso.service';
 import { CursoMother } from '../../../../tests/test-helpers/curso.mother';
 import { DisciplinaMother } from '../../../../tests/test-helpers/disciplina.mother';
 import { DisciplinaRespostaMapper } from '../../mappers/disciplina-resposta.mapper';
+import { ErroDadosInvalidosError } from '../../../domain/errors/erro-dados-invalidos.error';
 
 describe('Disciplina Controller - Testes unitários', () => {
   let disciplinaService: jest.Mocked<DisciplinaService>
@@ -116,6 +117,38 @@ describe('Disciplina Controller - Testes unitários', () => {
       expect(res.status).toHaveBeenCalledWith(201)
       expect(res.json).toHaveBeenCalledWith(DisciplinaRespostaMapper.paraResposta(disciplina, curso))
     })
+
+    it('lança ErroDadosInvalidosError quando o campo "codCurso" está ausente', async () => {
+      const req = { body: { periodo: 3, nome: 'Cálculo I', cargaHoraria: 60 } } as unknown as Request
+
+      await expect(controller.cadastrar(req, res)).rejects.toThrow(ErroDadosInvalidosError)
+      expect(disciplinaService.cadastrar).not.toHaveBeenCalled()
+    })
+
+    it('lança ErroDadosInvalidosError quando o campo "periodo" não é um número', async () => {
+      const req = {
+        body: { codCurso: '001', periodo: '3', nome: 'Cálculo I', cargaHoraria: 60 },
+      } as unknown as Request
+
+      await expect(controller.cadastrar(req, res)).rejects.toThrow(ErroDadosInvalidosError)
+      expect(disciplinaService.cadastrar).not.toHaveBeenCalled()
+    })
+
+    it('lança ErroDadosInvalidosError quando o campo "nome" está ausente', async () => {
+      const req = { body: { codCurso: '001', periodo: 3, cargaHoraria: 60 } } as unknown as Request
+
+      await expect(controller.cadastrar(req, res)).rejects.toThrow(ErroDadosInvalidosError)
+      expect(disciplinaService.cadastrar).not.toHaveBeenCalled()
+    })
+
+    it('lança ErroDadosInvalidosError quando o campo "cargaHoraria" não é um número', async () => {
+      const req = {
+        body: { codCurso: '001', periodo: 3, nome: 'Cálculo I', cargaHoraria: '60' },
+      } as unknown as Request
+
+      await expect(controller.cadastrar(req, res)).rejects.toThrow(ErroDadosInvalidosError)
+      expect(disciplinaService.cadastrar).not.toHaveBeenCalled()
+    })
   })
 
   describe('editar', () => {
@@ -135,6 +168,40 @@ describe('Disciplina Controller - Testes unitários', () => {
       expect(disciplinaService.editar).toHaveBeenCalledWith(disciplina.codigo, dto)
       expect(res.status).toHaveBeenCalledWith(200)
       expect(res.json).toHaveBeenCalledWith(DisciplinaRespostaMapper.paraResposta(disciplina, curso))
+    })
+
+    it('lança ErroDadosInvalidosError quando o campo "periodo" não é um número', async () => {
+      const req = {
+        params: { codigo: '001.001' },
+        body: { periodo: '3', nome: 'Cálculo I', cargaHoraria: 60 },
+      } as unknown as Request
+
+      await expect(controller.editar(req, res)).rejects.toThrow(ErroDadosInvalidosError)
+      expect(disciplinaService.editar).not.toHaveBeenCalled()
+    })
+
+    it('permite editar apenas alguns campos (ex: "periodo" e "cargaHoraria")', async () => {
+      const disciplina = DisciplinaMother.criar()
+      disciplinaService.editar.mockResolvedValue(disciplina)
+
+      const dto = { periodo: disciplina.periodo, cargaHoraria: disciplina.cargaHoraria }
+      const req = { params: { codigo: disciplina.codigo }, body: dto } as unknown as Request
+
+      await controller.editar(req, res)
+
+      expect(disciplinaService.editar).toHaveBeenCalledWith(disciplina.codigo, dto)
+      expect(res.status).toHaveBeenCalledWith(200)
+      expect(res.json).toHaveBeenCalledWith(DisciplinaRespostaMapper.paraResposta(disciplina, curso))
+    })
+
+    it('lança ErroDadosInvalidosError quando o campo "cargaHoraria" não é um número', async () => {
+      const req = {
+        params: { codigo: '001.001' },
+        body: { periodo: 3, nome: 'Cálculo I', cargaHoraria: '60' },
+      } as unknown as Request
+
+      await expect(controller.editar(req, res)).rejects.toThrow(ErroDadosInvalidosError)
+      expect(disciplinaService.editar).not.toHaveBeenCalled()
     })
   })
 

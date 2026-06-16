@@ -1,5 +1,7 @@
 import { Curso } from '../../src/domain/entities/curso/curso.entity';
-import { CursoProps } from '../../src/domain/entities/curso/curso.props';
+import { CursoFactory } from '../../src/domain/factories/curso.factory';
+
+type CursoRawProps = Pick<Curso, 'codigo' | 'nome' | 'periodos'>
 
 /**
  * Object Mother para a entidade Curso.
@@ -9,7 +11,7 @@ import { CursoProps } from '../../src/domain/entities/curso/curso.props';
  */
 export class CursoMother {
   /** Retorna um conjunto de props válidas, com possibilidade de sobrescrita. */
-  static props(override: Partial<CursoProps> = {}): CursoProps {
+  static props(override: Partial<CursoRawProps> = {}): CursoRawProps {
     return {
       codigo: '001',
       nome: 'Ciência da Computação',
@@ -19,7 +21,7 @@ export class CursoMother {
   }
 
   /** Retorna uma instância de Curso válida, com possibilidade de sobrescrita. */
-  static criar(override: Partial<CursoProps> = {}): Curso {
-    return Curso.criar(this.props(override))
+  static criar(override: Partial<CursoRawProps> = {}): Curso {
+    return CursoFactory.criar(this.props(override))
   }
 }

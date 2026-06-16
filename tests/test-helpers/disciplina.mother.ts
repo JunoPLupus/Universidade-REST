@@ -1,6 +1,8 @@
 import { Disciplina } from '../../src/domain/entities/disciplina/disciplina.entity';
-import { DisciplinaProps } from '../../src/domain/entities/disciplina/disciplina.props';
+import { DisciplinaFactory } from '../../src/domain/factories/disciplina.factory';
 import { CursoMother } from './curso.mother';
+
+type DisciplinaRawProps = Pick<Disciplina, 'codigo' | 'codCurso' | 'periodo' | 'nome' | 'cargaHoraria'>
 
 /**
  * Object Mother para a entidade Disciplina.
@@ -11,7 +13,7 @@ import { CursoMother } from './curso.mother';
  */
 export class DisciplinaMother {
   /** Retorna um conjunto de props válidas, com possibilidade de sobrescrita. */
-  static props(override: Partial<DisciplinaProps> = {}): DisciplinaProps {
+  static props(override: Partial<DisciplinaRawProps> = {}): DisciplinaRawProps {
     return {
       codigo: `${CursoMother.props().codigo}.001`,
       codCurso: CursoMother.props().codigo,
@@ -23,7 +25,7 @@ export class DisciplinaMother {
   }
 
   /** Retorna uma instância de Disciplina válida, com possibilidade de sobrescrita. */
-  static criar(override: Partial<DisciplinaProps> = {}): Disciplina {
-    return Disciplina.criar(this.props(override))
+  static criar(override: Partial<DisciplinaRawProps> = {}): Disciplina {
+    return DisciplinaFactory.criar(this.props(override))
   }
 }
