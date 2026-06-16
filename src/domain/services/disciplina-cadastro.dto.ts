@@ -1,4 +1,4 @@
-import { DisciplinaProps } from '../entities/disciplina/disciplina.props';
+import { Disciplina } from '../entities/disciplina/disciplina.entity';
 
 /**
  * Dados necessários para cadastrar uma nova disciplina.
@@ -7,4 +7,4 @@ import { DisciplinaProps } from '../entities/disciplina/disciplina.props';
  * `DisciplinaService` a partir do último código cadastrado no curso
  * informado em `codCurso`.
  */
-export type DisciplinaCadastroDTO = Pick<DisciplinaProps, 'codCurso' | 'periodo' | 'nome' | 'cargaHoraria'>
+export type DisciplinaCadastroDTO = Pick<Disciplina, 'codCurso' | 'periodo' | 'nome' | 'cargaHoraria'>

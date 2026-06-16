@@ -1,8 +1,10 @@
 import { Curso } from '../entities/curso/curso.entity';
 import { Disciplina } from "../entities/disciplina/disciplina.entity";
+import { CursoFactory } from '../factories/curso.factory';
 import { BuscarCursoFiltros, ICursoRepository } from '../repositories/curso.repository';
 import { IDisciplinaRepository } from '../repositories/disciplina.repository';
 import { ErroConflitoError } from '../errors/erro-conflito.error';
+import { cursoMensagens } from '../errors/mensagens/curso.mensagens';
 import { CursoCadastroDTO } from './curso-cadastro.dto';
 import { CursoEdicaoDTO } from './curso-edicao.dto';
 import { gerarProximoCodigo } from './utils/gerar-proximo-codigo.util';
@@ -38,13 +40,13 @@ export class CursoService {
     const cursoExistente = await this.cursoRepository.buscarPorNome(nome)
 
     if (cursoExistente) {
-      throw new ErroConflitoError(`Já existe um curso cadastrado com o nome "${nome}".`)
+      throw new ErroConflitoError(cursoMensagens.nomeDuplicado(nome))
     }
 
     const ultimoCodigo = await this.cursoRepository.buscarUltimoCodigo()
     const codigo = gerarProximoCodigo(ultimoCodigo)
 
-    const curso : Curso = Curso.criar({ codigo, nome: dto.nome, periodos: dto.periodos })
+    const curso : Curso = CursoFactory.criar({ codigo, nome: dto.nome, periodos: dto.periodos })
     await this.cursoRepository.cadastrar(curso)
 
     return curso
@@ -63,12 +65,14 @@ export class CursoService {
   async buscarPorCodigo(codigo: string): Promise<Curso> {
     return garantirExistencia(
       () => this.cursoRepository.buscarPorCodigo(codigo),
-      `Curso com código "${codigo}" não encontrado.`,
+      cursoMensagens.naoEncontrado(codigo),
     )
   }
 
   /**
    * Edita os dados de um curso existente.
+   *
+   * Campos não informados em `dto` mantêm o valor atual do curso.
    *
    * @throws ErroNaoEncontrado se o curso não existir.
    * @throws ErroConflitoError se o novo nome já estiver em uso por outro curso.
@@ -76,16 +80,18 @@ export class CursoService {
    * invariantes da entidade `Curso`.
    */
   async editar(codigo: string, dto: CursoEdicaoDTO): Promise<Curso> {
-    await this.buscarPorCodigo(codigo)
+    const cursoExistente = await this.buscarPorCodigo(codigo)
 
-    const nome = dto.nome.trim()
+    const nome = (dto.nome ?? cursoExistente.nome).trim()
+    const periodos = dto.periodos ?? cursoExistente.periodos
+
     const cursoComMesmoNome = await this.cursoRepository.buscarPorNome(nome)
 
     if (cursoComMesmoNome && cursoComMesmoNome.codigo !== codigo) {
-      throw new ErroConflitoError(`Já existe um curso cadastrado com o nome "${nome}".`)
+      throw new ErroConflitoError(cursoMensagens.nomeDuplicado(nome))
     }
 
-    const cursoAtualizado : Curso = Curso.criar({ codigo, nome: dto.nome, periodos: dto.periodos })
+    const cursoAtualizado : Curso = CursoFactory.criar({ codigo, nome, periodos })
     await this.cursoRepository.editar(cursoAtualizado)
 
     return cursoAtualizado
@@ -103,7 +109,7 @@ export class CursoService {
     const disciplinasVinculadas : Disciplina[] = await this.disciplinaRepository.buscar({ codCurso: codigo })
 
     if (disciplinasVinculadas.length > 0) {
-      throw new ErroConflitoError('Não é possível excluir um curso que possui disciplinas cadastradas.')
+      throw new ErroConflitoError(cursoMensagens.possuiDisciplinasVinculadas())
     }
 
     await this.cursoRepository.excluir(codigo)
