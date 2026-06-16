@@ -7,5 +7,5 @@ import { ErroDominioError } from './erro-dominio.error';
  * Mapeado pelo middleware global de erros para HTTP 409 (Conflict).
  */
 export class ErroConflitoError extends ErroDominioError {
-  readonly statusCode = 409;
+  readonly statusCode = 409
 }

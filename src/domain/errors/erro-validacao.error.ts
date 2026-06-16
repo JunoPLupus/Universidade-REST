@@ -7,5 +7,5 @@ import { ErroDominioError } from './erro-dominio.error';
  * Mapeado pelo middleware global de erros para HTTP 400 (Bad Request).
  */
 export class ErroValidacaoError extends ErroDominioError {
-  readonly statusCode = 400;
+  readonly statusCode = 400
 }

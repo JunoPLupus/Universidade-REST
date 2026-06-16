@@ -8,10 +8,10 @@
  */
 export abstract class ErroDominioError extends Error {
   /** Status HTTP correspondente a este tipo de erro. */
-  abstract readonly statusCode: number;
+  abstract readonly statusCode: number
 
   constructor(message: string) {
-    super(message);
-    this.name = this.constructor.name;
+    super(message)
+    this.name = this.constructor.name
   }
 }

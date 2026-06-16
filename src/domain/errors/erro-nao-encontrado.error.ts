@@ -6,5 +6,5 @@ import { ErroDominioError } from './erro-dominio.error';
  * Mapeado pelo middleware global de erros para HTTP 404 (Not Found).
  */
 export class ErroNaoEncontradoError extends ErroDominioError {
-  readonly statusCode = 404;
+  readonly statusCode = 404
 }
