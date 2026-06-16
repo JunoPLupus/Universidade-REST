@@ -1,6 +1,6 @@
 import { Disciplina as DisciplinaModel } from '@prisma/client';
 import { Disciplina } from '../../../domain/entities/disciplina/disciplina.entity';
-import { DisciplinaProps } from '../../../domain/entities/disciplina/disciplina.props';
+import { DisciplinaFactory } from '../../../domain/factories/disciplina.factory';
 
 /**
  * Converte entre o registro do Prisma (tabela `disciplina`) e a entidade de
@@ -9,7 +9,7 @@ import { DisciplinaProps } from '../../../domain/entities/disciplina/disciplina.
 export class DisciplinaMapper {
   /** Reconstitui a entidade de domínio a partir de um registro do banco. */
   static toDomain(raw: DisciplinaModel): Disciplina {
-    return Disciplina.criar({
+    return DisciplinaFactory.criar({
       codigo: raw.codigo,
       codCurso: raw.codCurso,
       periodo: raw.periodo,
@@ -19,7 +19,7 @@ export class DisciplinaMapper {
   }
 
   /** Converte a entidade de domínio para o formato aceito pelo Prisma. */
-  static toPersistence(disciplina: Disciplina): DisciplinaProps {
+  static toPersistence(disciplina: Disciplina): Pick<Disciplina, 'codigo' | 'codCurso' | 'periodo' | 'nome' | 'cargaHoraria'> {
     return {
       codigo: disciplina.codigo,
       codCurso: disciplina.codCurso,
