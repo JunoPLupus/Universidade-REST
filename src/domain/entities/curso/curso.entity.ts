@@ -1,50 +1,29 @@
-import { ErroValidacaoError } from '../../errors/erro-validacao.error';
 import { CursoProps } from './curso.props';
 
 /**
  * Entidade Curso.
  *
- * Representa um curso oferecido pela universidade. O factory `criar`
- * garante que nenhuma instância exista em um estado inválido — usado
- * tanto para criar um curso novo quanto para reconstituir um curso
- * existente a partir dos dados do banco.
+ * O construtor é privado: a única forma de obter uma instância é via
+ * `criarCurso`, e a única forma de montar `CursoProps` válidas é via
+ * `CursoFactory`. Assim, nenhuma instância de `Curso` pode existir em estado
+ * inválido.
  */
 export class Curso {
-  private constructor(
-    private readonly _codigo: string,
-    private readonly _nome: string,
-    private readonly _periodos: number,
-  ) {}
+  private constructor(private readonly props: CursoProps) {}
 
-  /**
-   * Cria uma instância de Curso validando as invariantes do domínio.
-   *
-   * @throws ErroValidacaoError se `nome` não tiver entre 5 e 100 caracteres,
-   * ou se `periodos` não estiver entre 3 e 12.
-   */
-  static criar(props: CursoProps): Curso {
-    const nome = props.nome.trim();
-
-    if (nome.length < 5 || nome.length > 100) {
-      throw new ErroValidacaoError('O nome do curso deve ter entre 5 e 100 caracteres.');
-    }
-
-    if (props.periodos < 3 || props.periodos > 12) {
-      throw new ErroValidacaoError('O curso deve ter entre 3 e 12 períodos.');
-    }
-
-    return new Curso(props.codigo, nome, props.periodos);
+  static criarCurso(props: CursoProps): Curso {
+    return new Curso(props)
   }
 
   get codigo(): string {
-    return this._codigo;
+    return this.props.codigo
   }
 
   get nome(): string {
-    return this._nome;
+    return this.props.nome.valor
   }
 
   get periodos(): number {
-    return this._periodos;
+    return this.props.periodos.valor
   }
 }
