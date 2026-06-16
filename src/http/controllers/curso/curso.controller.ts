@@ -4,6 +4,8 @@ import { CursoService } from '../../../domain/services/curso.service';
 import { CursoCadastroDTO } from '../../../domain/services/curso-cadastro.dto';
 import { CursoEdicaoDTO } from '../../../domain/services/curso-edicao.dto';
 import { CursoRespostaMapper } from '../../mappers/curso-resposta.mapper';
+import { Validador } from '../../validation/validador';
+import { paraFiltroString } from '../utils/filtros.util';
 
 /**
  * Controller responsável pelas rotas HTTP de Curso.
@@ -31,8 +33,8 @@ export class CursoController {
     const { nome, codigo } = req.query
 
     const cursos : Curso[] = await this.cursoService.buscar({
-      nome: typeof nome === 'string' ? nome : undefined,
-      codigo: typeof codigo === 'string' ? codigo : undefined,
+      nome: paraFiltroString(nome),
+      codigo: paraFiltroString(codigo),
     })
 
     res.status(200).json(cursos.map(CursoRespostaMapper.paraResposta))
@@ -44,7 +46,9 @@ export class CursoController {
    * @throws ErroNaoEncontrado (404) se não existir curso com o código informado.
    */
   async buscarPorCodigo(req: Request, res: Response): Promise<void> {
-    const curso : Curso = await this.cursoService.buscarPorCodigo(req.params.codigo as string)
+    const codigo = (req.params.codigo as string).trim()
+
+    const curso : Curso = await this.cursoService.buscarPorCodigo(codigo)
 
     res.status(200).json(CursoRespostaMapper.paraResposta(curso))
   }
@@ -52,10 +56,13 @@ export class CursoController {
   /**
    * @param req.body - Dados do curso a ser cadastrado, no formato `CursoCadastroDTO`.
    * @returns 201 com o curso cadastrado no formato `CursoRespostaDTO`.
+   * @throws ErroDadosInvalidos (422) se `nome`/`periodos` estiverem ausentes ou com tipo inválido.
    * @throws ErroValidacao (400) se `nome`/`periodos` violarem as invariantes de Curso.
    * @throws ErroConflito (409) se já existir um curso com o mesmo nome.
    */
   async cadastrar(req: Request, res: Response): Promise<void> {
+    Validador.para(req.body).texto('nome').numero('periodos').validar()
+
     const dto: CursoCadastroDTO = req.body
 
     const curso : Curso = await this.cursoService.cadastrar(dto)
@@ -65,16 +72,21 @@ export class CursoController {
 
   /**
    * @param req.params.codigo - Código do curso a ser editado.
-   * @param req.body - Novos dados do curso, no formato `CursoEdicaoDTO`.
+   * @param req.body - Novos dados do curso, no formato `CursoEdicaoDTO`. Campos
+   * omitidos mantêm o valor atual.
    * @returns 200 com o curso atualizado no formato `CursoRespostaDTO`.
+   * @throws ErroDadosInvalidos (422) se `nome`/`periodos`, quando informados, tiverem tipo inválido.
    * @throws ErroNaoEncontrado (404) se o curso não existir.
    * @throws ErroConflito (409) se o novo nome já estiver em uso por outro curso.
    * @throws ErroValidacao (400) se `nome`/`periodos` violarem as invariantes de Curso.
    */
   async editar(req: Request, res: Response): Promise<void> {
-    const dto: CursoEdicaoDTO = req.body
+    Validador.para(req.body).textoOpcional('nome').numeroOpcional('periodos').validar()
 
-    const curso : Curso = await this.cursoService.editar(req.params.codigo as string, dto)
+    const dto: CursoEdicaoDTO = req.body
+    const codigo = (req.params.codigo as string).trim()
+
+    const curso : Curso = await this.cursoService.editar(codigo, dto)
 
     res.status(200).json(CursoRespostaMapper.paraResposta(curso))
   }
@@ -86,7 +98,9 @@ export class CursoController {
    * @throws ErroConflito (409) se existirem disciplinas vinculadas ao curso.
    */
   async excluir(req: Request, res: Response): Promise<void> {
-    await this.cursoService.excluir(req.params.codigo as string)
+    const codigo = (req.params.codigo as string).trim()
+
+    await this.cursoService.excluir(codigo)
 
     res.status(204).send()
   }

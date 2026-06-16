@@ -7,6 +7,8 @@ import { Curso } from "../../../domain/entities/curso/curso.entity";
 import { Disciplina } from '../../../domain/entities/disciplina/disciplina.entity';
 import { DisciplinaRespostaDTO } from '../../dto/disciplina-resposta.dto';
 import { DisciplinaRespostaMapper } from '../../mappers/disciplina-resposta.mapper';
+import { Validador } from '../../validation/validador';
+import { paraFiltroString, paraFiltroNumerico } from '../utils/filtros.util';
 
 /**
  * Controller responsável pelas rotas HTTP de Disciplina.
@@ -41,28 +43,6 @@ export class DisciplinaController {
   }
 
   /**
-   * Converte um valor de query string para `string`, retornando `undefined`
-   * caso o valor não tenha sido informado (ou não seja uma string).
-   */
-  private paraFiltroString(valor: unknown): string | undefined {
-    return typeof valor === 'string' ? valor : undefined
-  }
-
-  /**
-   * Converte um valor de query string para `number`, retornando `undefined`
-   * caso o valor não tenha sido informado ou não represente um número válido.
-   */
-  private paraFiltroNumerico(valor: unknown): number | undefined {
-    if (typeof valor !== 'string') {
-      return undefined
-    }
-
-    const numero = Number(valor)
-
-    return Number.isNaN(numero) ? undefined : numero
-  }
-
-  /**
    * Lista disciplinas, opcionalmente filtrando por `nome` (busca parcial),
    * `codCurso`, `codigo`, `cargaHoraria` e/ou `periodo` (exatos), informados
    * via query string.
@@ -78,11 +58,11 @@ export class DisciplinaController {
     const { nome, codCurso, codigo, cargaHoraria, periodo } = req.query
 
     const disciplinas : Disciplina[] = await this.disciplinaService.buscar({
-      nome: this.paraFiltroString(nome),
-      codCurso: this.paraFiltroString(codCurso),
-      codigo: this.paraFiltroString(codigo),
-      cargaHoraria: this.paraFiltroNumerico(cargaHoraria),
-      periodo: this.paraFiltroNumerico(periodo),
+      nome: paraFiltroString(nome),
+      codCurso: paraFiltroString(codCurso),
+      codigo: paraFiltroString(codigo),
+      cargaHoraria: paraFiltroNumerico(cargaHoraria),
+      periodo: paraFiltroNumerico(periodo),
     })
 
     const resposta = await Promise.all(disciplinas.map((disciplina) => this.paraResposta(disciplina)))
@@ -96,7 +76,9 @@ export class DisciplinaController {
    * @throws ErroNaoEncontrado (404) se não existir disciplina com o código informado.
    */
   async buscarPorCodigo(req: Request, res: Response): Promise<void> {
-    const disciplina : Disciplina = await this.disciplinaService.buscarPorCodigo(req.params.codigo as string)
+    const codigo = (req.params.codigo as string).trim()
+
+    const disciplina : Disciplina = await this.disciplinaService.buscarPorCodigo(codigo)
 
     res.status(200).json(await this.paraResposta(disciplina))
   }
@@ -104,11 +86,19 @@ export class DisciplinaController {
   /**
    * @param req.body - Dados da disciplina a ser cadastrada, no formato `DisciplinaCadastroDTO`.
    * @returns 201 com a disciplina cadastrada no formato `DisciplinaRespostaDTO`.
+   * @throws ErroDadosInvalidos (422) se algum campo obrigatório estiver ausente ou com tipo inválido.
    * @throws ErroValidacao (400) se os dados violarem as invariantes de Disciplina.
    * @throws ErroNaoEncontrado (404) se o curso (`codCurso`) informado não existir.
    * @throws ErroConflito (409) se já existir uma disciplina com o mesmo código.
    */
   async cadastrar(req: Request, res: Response): Promise<void> {
+    Validador.para(req.body)
+      .texto('codCurso')
+      .numero('periodo')
+      .texto('nome')
+      .numero('cargaHoraria')
+      .validar()
+
     const dto: DisciplinaCadastroDTO = req.body
 
     const disciplina : Disciplina = await this.disciplinaService.cadastrar(dto)
@@ -119,14 +109,19 @@ export class DisciplinaController {
   /**
    * @param req.params.codigo - Código da disciplina a ser editada.
    * @param req.body - Novos dados da disciplina, no formato `DisciplinaEdicaoDTO`.
+   * Campos omitidos mantêm o valor atual.
    * @returns 200 com a disciplina atualizada no formato `DisciplinaRespostaDTO`.
+   * @throws ErroDadosInvalidos (422) se algum campo informado tiver tipo inválido.
    * @throws ErroNaoEncontrado (404) se a disciplina não existir.
    * @throws ErroValidacao (400) se os dados violarem as invariantes de Disciplina.
    */
   async editar(req: Request, res: Response): Promise<void> {
-    const dto: DisciplinaEdicaoDTO = req.body
+    Validador.para(req.body).numeroOpcional('periodo').textoOpcional('nome').numeroOpcional('cargaHoraria').validar()
 
-    const disciplina : Disciplina = await this.disciplinaService.editar(req.params.codigo as string, dto)
+    const dto: DisciplinaEdicaoDTO = req.body
+    const codigo = (req.params.codigo as string).trim()
+
+    const disciplina : Disciplina = await this.disciplinaService.editar(codigo, dto)
 
     res.status(200).json(await this.paraResposta(disciplina))
   }
@@ -137,7 +132,9 @@ export class DisciplinaController {
    * @throws ErroNaoEncontrado (404) se a disciplina não existir.
    */
   async excluir(req: Request, res: Response): Promise<void> {
-    await this.disciplinaService.excluir(req.params.codigo as string)
+    const codigo = (req.params.codigo as string).trim()
+
+    await this.disciplinaService.excluir(codigo)
 
     res.status(204).send()
   }
@@ -150,7 +147,9 @@ export class DisciplinaController {
    * @throws ErroNaoEncontrado (404) se não existir curso com o código informado.
    */
   async excluirPorCurso(req: Request, res: Response): Promise<void> {
-    await this.disciplinaService.excluirPorCurso(req.params.codigo as string)
+    const codigo = (req.params.codigo as string).trim()
+
+    await this.disciplinaService.excluirPorCurso(codigo)
 
     res.status(204).send()
   }
