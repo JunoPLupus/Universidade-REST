@@ -7,15 +7,12 @@ describe('Validador - Testes unitários', () => {
       expect(() => Validador.para({ nome: 'Cálculo I' }).texto('nome').validar()).not.toThrow()
     })
 
-    it('lança ErroDadosInvalidosError informando que o campo é obrigatório quando ausente', () => {
-      expect(() => Validador.para({}).texto('nome').validar()).toThrow(ErroDadosInvalidosError)
-      expect(() => Validador.para({}).texto('nome').validar()).toThrow("O campo 'nome' é obrigatório.")
-    })
-
-    it('lança ErroDadosInvalidosError informando que o campo é obrigatório quando nulo', () => {
-      expect(() => Validador.para({ nome: null }).texto('nome').validar()).toThrow(
-        "O campo 'nome' é obrigatório.",
-      )
+    it.each([
+      ['ausente', {} ],
+      ['nulo', { nome: null }]
+    ])('lança ErroDadosInvalidosError informando que o campo é obrigatório quando %s', (_, nome ) => {
+      expect(() => Validador.para(nome).texto('nome').validar()).toThrow(ErroDadosInvalidosError)
+      expect(() => Validador.para(nome).texto('nome').validar()).toThrow("O campo 'nome' é obrigatório.")
     })
 
     it('lança ErroDadosInvalidosError informando o tipo esperado quando o campo não é uma string', () => {
@@ -38,14 +35,11 @@ describe('Validador - Testes unitários', () => {
       )
     })
 
-    it('lança ErroDadosInvalidosError informando o tipo esperado quando o campo não é um número', () => {
-      expect(() => Validador.para({ periodos: '8' }).numero('periodos').validar()).toThrow(
-        "O campo 'periodos' deve ser um número.",
-      )
-    })
-
-    it('lança ErroDadosInvalidosError informando o tipo esperado quando o campo é NaN', () => {
-      expect(() => Validador.para({ periodos: NaN }).numero('periodos').validar()).toThrow(
+    it.each([
+      ['não é um número', { periodos: '8' } ],
+      ['é NaN', { periodos: NaN }]
+    ])('lança ErroDadosInvalidosError informando o tipo esperado quando o campo %s', (_, periodos ) => {
+        expect(() => Validador.para(periodos).numero('periodos').validar()).toThrow(
         "O campo 'periodos' deve ser um número.",
       )
     })
