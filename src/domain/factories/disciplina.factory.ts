@@ -3,7 +3,8 @@ import { Texto } from '../value-objects/texto/texto.value-object';
 import { Numero } from '../value-objects/numero/numero.value-object';
 import { disciplinaMensagens } from '../errors/mensagens/disciplina.mensagens';
 
-const NOME_MIN = 1
+const NOME_MIN = 3
+const NOME_MAX = 100
 const PERIODO_MIN = 3
 const CARGA_HORARIA_MIN = 1
 
@@ -24,7 +25,7 @@ export class DisciplinaFactory {
       codigo: dados.codigo,
       codCurso: dados.codCurso,
       periodo: new Numero(dados.periodo, disciplinaMensagens.periodoInvalido(PERIODO_MIN), PERIODO_MIN),
-      nome: new Texto(dados.nome, disciplinaMensagens.nomeInvalido(), NOME_MIN),
+      nome: new Texto(dados.nome, disciplinaMensagens.nomeInvalido(NOME_MIN, NOME_MAX), NOME_MIN, NOME_MAX),
       cargaHoraria: new Numero(dados.cargaHoraria, disciplinaMensagens.cargaHorariaInvalida(), CARGA_HORARIA_MIN),
     })
   }

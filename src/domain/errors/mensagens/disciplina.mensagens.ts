@@ -12,7 +12,8 @@ export const disciplinaMensagens = {
   nomeDuplicado: (nome: string): string =>
     `Já existe uma disciplina chamada '${nome}' cadastrada nesse curso.`,
 
-  nomeInvalido: (): string => 'O nome da disciplina é obrigatório.',
+  nomeInvalido: (min: number, max: number): string =>
+      `O nome do curso deve ter entre ${min} e ${max} caracteres.`,
 
   periodoInvalido: (min: number): string => `O período da disciplina deve ser no mínimo ${min}.`,
 
