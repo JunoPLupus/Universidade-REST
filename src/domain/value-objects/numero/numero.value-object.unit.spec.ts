@@ -21,13 +21,11 @@ describe('Numero Value Object - Testes unitários', () => {
     expect(new Numero(12, mensagemInvalida, 3, 12).valor).toBe(12)
   })
 
-  it('lança ErroValidacaoError quando o valor é menor que o mínimo', () => {
-    expect(() => new Numero(2, mensagemInvalida, 3)).toThrow(ErroValidacaoError)
-    expect(() => new Numero(2, mensagemInvalida, 3)).toThrow(mensagemInvalida)
-  })
-
-  it('lança ErroValidacaoError quando o valor é maior que o máximo', () => {
-    expect(() => new Numero(13, mensagemInvalida, undefined, 12)).toThrow(ErroValidacaoError)
-    expect(() => new Numero(13, mensagemInvalida, undefined, 12)).toThrow(mensagemInvalida)
+  it.each([
+    { cenario: 'menor que o mínimo', valor: 2, minimo: 3, maximo: undefined },
+    { cenario: 'maior que o máximo', valor: 13, minimo: undefined, maximo: 12 }
+  ])('lança ErroValidacaoError quando o valor é $cenario', ({ valor, minimo, maximo }) => {
+    expect(() => new Numero(valor, mensagemInvalida, minimo, maximo)).toThrow(ErroValidacaoError)
+    expect(() => new Numero(valor, mensagemInvalida,  minimo, maximo)).toThrow(mensagemInvalida)
   })
 })

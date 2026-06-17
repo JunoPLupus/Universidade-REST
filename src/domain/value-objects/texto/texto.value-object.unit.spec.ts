@@ -16,14 +16,12 @@ describe('Texto Value Object - Testes unitários', () => {
     expect(texto.valor).toBe('qualquer coisa')
   })
 
-  it('lança ErroValidacaoError quando o texto (após trim) é menor que o mínimo', () => {
-    expect(() => new Texto('   abc   ', mensagemInvalida, 5)).toThrow(ErroValidacaoError)
-    expect(() => new Texto('   abc   ', mensagemInvalida, 5)).toThrow(mensagemInvalida)
-  })
-
-  it('lança ErroValidacaoError quando o texto (após trim) é maior que o máximo', () => {
-    expect(() => new Texto('abcdefghij', mensagemInvalida, undefined, 5)).toThrow(ErroValidacaoError)
-    expect(() => new Texto('abcdefghij', mensagemInvalida, undefined, 5)).toThrow(mensagemInvalida)
+  it.each([
+    { cenario: 'menor que o mínimo', texto: '   abc   ', minimo: 5, maximo: undefined },
+    { cenario: 'maior que o máximo', texto: 'abcdefghij', minimo: undefined, maximo: 5 }
+  ])('lança ErroValidacaoError quando o texto é $cenario', ({ texto, minimo, maximo }) => {
+    expect(() => new Texto(texto, mensagemInvalida, minimo, maximo)).toThrow(ErroValidacaoError)
+    expect(() => new Texto(texto, mensagemInvalida, minimo, maximo)).toThrow(mensagemInvalida)
   })
 
   it('considera apenas os espaços nas extremidades ao validar o tamanho', () => {
