@@ -1,0 +1,158 @@
+= Universidade REST API
+:toc: left
+:toc-title: Sumário
+
+image:https://github.com/JunoPLupus/Universidade-REST/actions/workflows/tests.yml/badge.svg[Tests,link=https://github.com/JunoPLupus/Universidade-REST/actions/workflows/tests.yml]
+image:https://img.shields.io/badge/Node.js-24-grey?logo=nodedotjs&logoColor=white&labelColor=339933[Node.js]
+image:https://img.shields.io/badge/TypeScript-6-grey?logo=typescript&logoColor=white&labelColor=3178C6[TypeScript]
+image:https://img.shields.io/badge/Express-5-grey?logo=express&logoColor=white&labelColor=000000[Express]
+image:https://img.shields.io/badge/Prisma-5-grey?logo=prisma&logoColor=white&labelColor=2D3748[Prisma]
+image:https://img.shields.io/badge/PostgreSQL-16-grey?logo=postgresql&logoColor=white&labelColor=4169E1[PostgreSQL]
+
+API REST para gestão de cursos e disciplinas, construída com Node.js, TypeScript, Express e PostgreSQL (via Prisma ORM).
+
+== Pré-requisitos
+
+* Node.js 24+
+* PostgreSQL rodando localmente (ou via Docker)
+
+== Configuração do ambiente
+
+Copie o arquivo de exemplo e preencha as variáveis:
+
+[source,bash]
+----
+cp .env.example .env
+----
+
+[cols="1,2", options="header"]
+|===
+| Variável | Descrição
+
+| `PORT`
+| Porta da API (padrão: `3000`)
+
+| `DATABASE_URL`
+| String de conexão PostgreSQL para o banco principal
+
+| `DATABASE_URL_TEST`
+| String de conexão PostgreSQL para o banco de testes (tabelas limpas a cada execução)
+
+| `JWT_SECRET`
+| Segredo para assinar tokens JWT
+
+| `JWT_EXPIRES_IN`
+| Tempo de expiração dos tokens (ex.: `2h`)
+|===
+
+== Rodando localmente
+
+[source,bash]
+----
+# Instalar dependências
+npm install
+
+# Gerar o Prisma Client
+npm run prisma:generate
+
+# Aplicar as migrations no banco principal
+npm run prisma:migrate
+
+# Iniciar em modo desenvolvimento (hot reload)
+npm run dev
+
+# Ou compilar e iniciar em produção
+npm run build
+npm start
+----
+
+A API estará disponível em http://localhost:3000. +
+A documentação Swagger estará em http://localhost:3000/docs.
+
+== Rodando com Docker
+
+[source,bash]
+----
+# Build da imagem
+docker build -t universidade-rest .
+
+# Rodar o container
+docker run -p 3000:3000 -e DATABASE_URL="postgresql://usuario:senha@host.docker.internal:5432/universidade?schema=public" \
+  -e JWT_SECRET="seu-segredo" -e JWT_EXPIRES_IN="2h" universidade-rest
+----
+
+NOTE: O container não inclui o PostgreSQL. Use um banco externo ou suba um via `docker run postgres`.
+
+== Testes
+
+[source,bash]
+----
+# Testes unitários
+npm run test:unit
+
+# Testes de integração (requer DATABASE_URL_TEST configurada)
+npm run test:integration
+
+# Todos os testes
+npm test
+----
+
+== Endpoints
+
+=== Cursos
+[cols="1,2,2", options="header"]
+|===
+| Método | Rota | Descrição
+
+| `GET`
+| `/cursos`
+| Listar cursos (filtros opcionais por nome e código)
+
+| `GET`
+| `/cursos/:codigo`
+| Buscar curso por código
+
+| `POST`
+| `/cursos`
+| Cadastrar curso
+
+| `PATCH`
+| `/cursos/:codigo`
+| Editar curso (campos opcionais)
+
+| `DELETE`
+| `/cursos/:codigo`
+| Excluir curso
+
+| `DELETE`
+| `/cursos/:codigo/disciplinas`
+| Excluir todas as disciplinas do curso
+|===
+
+=== Disciplinas
+[cols="1,2,2", options="header"]
+|===
+| Método | Rota | Descrição
+
+| `GET`
+| `/disciplinas`
+| Listar disciplinas (filtros opcionais)
+
+| `GET`
+| `/disciplinas/:codigo`
+| Buscar disciplina por código
+
+| `POST`
+| `/disciplinas`
+| Cadastrar disciplina
+
+| `PATCH`
+| `/disciplinas/:codigo`
+| Editar disciplina (campos opcionais)
+
+| `DELETE`
+| `/disciplinas/:codigo`
+| Excluir disciplina
+|===
+
+Consulte a documentação completa em `/docs` com exemplos de request/response e descrição de todos os erros possíveis.
