@@ -5,8 +5,8 @@ import { BuscarCursoFiltros, ICursoRepository } from '../repositories/curso.repo
 import { IDisciplinaRepository } from '../repositories/disciplina.repository';
 import { ErroConflitoError } from '../errors/erro-conflito.error';
 import { cursoMensagens } from '../errors/mensagens/curso.mensagens';
-import { CursoCadastroDTO } from './curso-cadastro.dto';
-import { CursoEdicaoDTO } from './curso-edicao.dto';
+import { CursoCadastroDTO } from '../dto/curso/curso-cadastro.dto';
+import { CursoEdicaoDTO } from '../dto/curso/curso-edicao.dto';
 import { gerarProximoCodigo } from './utils/gerar-proximo-codigo.util';
 import { garantirExistencia } from './utils/garantir-existencia.util';
 

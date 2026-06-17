@@ -1,4 +1,4 @@
-import { Curso } from '../entities/curso/curso.entity';
+import { Curso } from '../../entities/curso/curso.entity';
 
 /**
  * Dados necessários para editar um curso existente.

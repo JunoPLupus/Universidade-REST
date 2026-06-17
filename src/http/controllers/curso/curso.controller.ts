@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import { Curso } from "../../../domain/entities/curso/curso.entity";
 import { CursoService } from '../../../domain/services/curso.service';
-import { CursoCadastroDTO } from '../../../domain/services/curso-cadastro.dto';
-import { CursoEdicaoDTO } from '../../../domain/services/curso-edicao.dto';
+import { CursoCadastroDTO } from '../../../domain/dto/curso/curso-cadastro.dto';
+import { CursoEdicaoDTO } from '../../../domain/dto/curso/curso-edicao.dto';
 import { CursoRespostaMapper } from '../../mappers/curso-resposta.mapper';
 import { Validador } from '../../validation/validador';
 import { paraFiltroString } from '../utils/filtros.util';

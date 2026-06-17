@@ -7,8 +7,8 @@ import { ErroConflitoError } from '../errors/erro-conflito.error';
 import { ErroValidacaoError } from '../errors/erro-validacao.error';
 import { cursoMensagens } from '../errors/mensagens/curso.mensagens';
 import { disciplinaMensagens } from '../errors/mensagens/disciplina.mensagens';
-import { DisciplinaCadastroDTO } from './disciplina-cadastro.dto';
-import { DisciplinaEdicaoDTO } from './disciplina-edicao.dto';
+import { DisciplinaCadastroDTO } from '../dto/disciplina/disciplina-cadastro.dto';
+import { DisciplinaEdicaoDTO } from '../dto/disciplina/disciplina-edicao.dto';
 import { gerarProximoCodigo } from './utils/gerar-proximo-codigo.util';
 import { garantirExistencia } from './utils/garantir-existencia.util';
 

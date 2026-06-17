@@ -1,4 +1,4 @@
-import { Disciplina } from '../entities/disciplina/disciplina.entity';
+import { Disciplina } from '../../entities/disciplina/disciplina.entity';
 
 /**
  * Dados necessários para cadastrar uma nova disciplina.
