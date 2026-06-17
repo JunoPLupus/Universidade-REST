@@ -73,7 +73,11 @@ export class DisciplinaService {
     return disciplina
   }
 
-  /** Busca disciplinas pelos filtros informados (todos opcionais; sem filtros, retorna todas). */
+  /**
+   * Busca disciplinas pelos filtros informados (todos opcionais; sem filtros, retorna todas).
+   *
+   * @throws ErroNaoEncontrado se não existir curso com o código 'idCurso' informado.
+   */
   async buscar(filtros: BuscarDisciplinaFiltros): Promise<Disciplina[]> {
     if (filtros.codCurso != undefined) {
       await garantirExistencia(

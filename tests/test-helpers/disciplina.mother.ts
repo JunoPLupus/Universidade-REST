@@ -2,6 +2,7 @@ import { Disciplina } from '../../src/domain/entities/disciplina/disciplina.enti
 import { DisciplinaFactory } from '../../src/domain/factories/disciplina.factory';
 import { CursoMother } from './curso.mother';
 import { DisciplinaService } from "../../src/domain/services/disciplina.service";
+import { IDisciplinaRepository } from "../../src/domain/repositories/disciplina.repository";
 
 type DisciplinaRawProps = Pick<Disciplina, 'codigo' | 'codCurso' | 'periodo' | 'nome' | 'cargaHoraria'>
 
@@ -32,6 +33,22 @@ export class DisciplinaMother {
    */
   static criar(override: Partial<DisciplinaRawProps> = {}): Disciplina {
     return DisciplinaFactory.criar(this.props(override))
+  }
+
+  /**
+   * @return Um mock de IDisciplinaRepository.
+   */
+  static criarRepositoryMock() : jest.Mocked<IDisciplinaRepository> {
+    return {
+      buscar: jest.fn(),
+      buscarPorCodigo: jest.fn(),
+      buscarPorNomeECurso: jest.fn(),
+      buscarUltimoCodigoDoCurso: jest.fn(),
+      cadastrar: jest.fn(),
+      editar: jest.fn(),
+      excluir: jest.fn(),
+      excluirPorCurso: jest.fn()
+    } as unknown as jest.Mocked<IDisciplinaRepository>
   }
 
   /**
