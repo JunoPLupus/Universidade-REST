@@ -1,7 +1,7 @@
 import { Curso } from '../../src/domain/entities/curso/curso.entity';
 import { CursoFactory } from '../../src/domain/factories/curso.factory';
-import { CursoService } from "../../src/domain/services/curso.service";
-import {ICursoRepository} from "../../src/domain/repositories/curso.repository";
+import { ICursoRepository } from "../../src/domain/repositories/curso.repository";
+import { CursoService } from "../../src/domain/services/curso/curso.service";
 
 type CursoRawProps = Pick<Curso, 'codigo' | 'nome' | 'periodos'>
 

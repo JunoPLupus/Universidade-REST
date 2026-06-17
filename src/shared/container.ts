@@ -1,10 +1,10 @@
 import { prisma } from "../infra/database/prisma-client";
 
 import { CursoPgRepositoryImpl } from "../infra/repositories/curso/curso-pg.repository.impl";
-import { DisciplinaPgRepositoryImpl } from "../infra/repositories/disciplina/disciplina-pg.repository.impl";
-import { CursoService } from "../domain/services/curso.service";
-import { DisciplinaService } from "../domain/services/disciplina.service";
+import { CursoService } from "../domain/services/curso/curso.service";
 import { CursoController } from "../http/controllers/curso/curso.controller";
+import { DisciplinaPgRepositoryImpl } from "../infra/repositories/disciplina/disciplina-pg.repository.impl";
+import { DisciplinaService } from "../domain/services/disciplina/disciplina.service";
 import { DisciplinaController } from "../http/controllers/disciplina/disciplina.controller";
 
 //#region repositories

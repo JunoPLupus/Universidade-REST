@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { Curso } from "../../../domain/entities/curso/curso.entity";
-import { CursoService } from '../../../domain/services/curso.service';
+import { CursoService } from "../../../domain/services/curso/curso.service";
 import { CursoCadastroDTO } from '../../../domain/dto/curso/curso-cadastro.dto';
 import { CursoEdicaoDTO } from '../../../domain/dto/curso/curso-edicao.dto';
 import { CursoRespostaMapper } from '../../mappers/curso-resposta.mapper';

@@ -1,7 +1,7 @@
 import { Disciplina } from '../../src/domain/entities/disciplina/disciplina.entity';
 import { DisciplinaFactory } from '../../src/domain/factories/disciplina.factory';
 import { CursoMother } from './curso.mother';
-import { DisciplinaService } from "../../src/domain/services/disciplina.service";
+import { DisciplinaService } from "../../src/domain/services/disciplina/disciplina.service";
 import { IDisciplinaRepository } from "../../src/domain/repositories/disciplina.repository";
 
 type DisciplinaRawProps = Pick<Disciplina, 'codigo' | 'codCurso' | 'periodo' | 'nome' | 'cargaHoraria'>

@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 import { Disciplina } from "../../../domain/entities/disciplina/disciplina.entity";
-import { DisciplinaService } from '../../../domain/services/disciplina.service';
+import { DisciplinaService } from '../../../domain/services/disciplina/disciplina.service';
 import { DisciplinaController } from './disciplina.controller';
 import { DisciplinaMother } from '../../../../tests/test-helpers/disciplina.mother';
 import { DisciplinaRespostaMapper } from '../../mappers/disciplina-resposta.mapper';
 import { Curso } from "../../../domain/entities/curso/curso.entity";
-import { CursoService } from '../../../domain/services/curso.service';
+import { CursoService } from "../../../domain/services/curso/curso.service";
 import { CursoMother } from '../../../../tests/test-helpers/curso.mother';
 import { ErroDadosInvalidosError } from '../../../domain/errors/erro-dados-invalidos.error';
 
@@ -14,10 +14,13 @@ describe('Disciplina Controller - Testes unitários', () => {
   let cursoService: jest.Mocked<CursoService>
   let controller: DisciplinaController
   let res: Response
-  const curso : Curso = CursoMother.criar()
-  const disciplina : Disciplina = DisciplinaMother.criar()
+  let curso : Curso
+  let disciplina : Disciplina
 
   beforeEach(() => {
+    curso = CursoMother.criar()
+    disciplina = DisciplinaMother.criar()
+
     disciplinaService = DisciplinaMother.criarServiceMock()
 
     cursoService = CursoMother.criarServiceMock(curso)

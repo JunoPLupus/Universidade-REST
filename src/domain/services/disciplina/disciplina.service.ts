@@ -1,16 +1,16 @@
-import { Curso } from "../entities/curso/curso.entity";
-import { Disciplina } from '../entities/disciplina/disciplina.entity';
-import { DisciplinaFactory } from '../factories/disciplina.factory';
-import { BuscarDisciplinaFiltros, IDisciplinaRepository } from '../repositories/disciplina.repository';
-import { ICursoRepository } from '../repositories/curso.repository';
-import { ErroConflitoError } from '../errors/erro-conflito.error';
-import { ErroValidacaoError } from '../errors/erro-validacao.error';
-import { cursoMensagens } from '../errors/mensagens/curso.mensagens';
-import { disciplinaMensagens } from '../errors/mensagens/disciplina.mensagens';
-import { DisciplinaCadastroDTO } from '../dto/disciplina/disciplina-cadastro.dto';
-import { DisciplinaEdicaoDTO } from '../dto/disciplina/disciplina-edicao.dto';
-import { gerarProximoCodigo } from './utils/gerar-proximo-codigo.util';
-import { garantirExistencia } from './utils/garantir-existencia.util';
+import { Disciplina } from '../../entities/disciplina/disciplina.entity';
+import { DisciplinaFactory } from '../../factories/disciplina.factory';
+import { DisciplinaCadastroDTO } from '../../dto/disciplina/disciplina-cadastro.dto';
+import { DisciplinaEdicaoDTO } from '../../dto/disciplina/disciplina-edicao.dto';
+import { BuscarDisciplinaFiltros, IDisciplinaRepository } from '../../repositories/disciplina.repository';
+import { disciplinaMensagens } from '../../errors/mensagens/disciplina.mensagens';
+import { Curso } from "../../entities/curso/curso.entity";
+import { ICursoRepository } from '../../repositories/curso.repository';
+import { cursoMensagens } from '../../errors/mensagens/curso.mensagens';
+import { gerarProximoCodigo } from '../utils/gerar-proximo-codigo.util';
+import { garantirExistencia } from '../utils/garantir-existencia.util';
+import { ErroConflitoError } from '../../errors/erro-conflito.error';
+import { ErroValidacaoError } from '../../errors/erro-validacao.error';
 
 /**
  * Service responsável pelas regras de negócio relacionadas a Disciplina.

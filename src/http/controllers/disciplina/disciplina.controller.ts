@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
-import { DisciplinaService } from '../../../domain/services/disciplina.service';
-import { CursoService } from '../../../domain/services/curso.service';
-import { DisciplinaCadastroDTO } from '../../../domain/dto/disciplina/disciplina-cadastro.dto';
-import { DisciplinaEdicaoDTO } from '../../../domain/dto/disciplina/disciplina-edicao.dto';
-import { Curso } from "../../../domain/entities/curso/curso.entity";
 import { Disciplina } from '../../../domain/entities/disciplina/disciplina.entity';
 import { DisciplinaRespostaDTO } from '../../dto/disciplina-resposta.dto';
+import { DisciplinaCadastroDTO } from '../../../domain/dto/disciplina/disciplina-cadastro.dto';
+import { DisciplinaEdicaoDTO } from '../../../domain/dto/disciplina/disciplina-edicao.dto';
 import { DisciplinaRespostaMapper } from '../../mappers/disciplina-resposta.mapper';
+import { DisciplinaService } from '../../../domain/services/disciplina/disciplina.service';
+import { Curso } from "../../../domain/entities/curso/curso.entity";
+import { CursoService } from "../../../domain/services/curso/curso.service";
 import { Validador } from '../../validation/validador';
 import { paraFiltroString, paraFiltroNumerico } from '../utils/filtros.util';
 

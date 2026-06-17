@@ -1,13 +1,13 @@
-import { Disciplina } from "../entities/disciplina/disciplina.entity";
-import { IDisciplinaRepository } from '../repositories/disciplina.repository';
+import { Disciplina } from "../../entities/disciplina/disciplina.entity";
+import { IDisciplinaRepository } from '../../repositories/disciplina.repository';
 import { DisciplinaService } from './disciplina.service';
-import { DisciplinaMother } from '../../../tests/test-helpers/disciplina.mother';
-import { Curso } from "../entities/curso/curso.entity";
-import { ICursoRepository } from '../repositories/curso.repository';
-import { CursoMother } from '../../../tests/test-helpers/curso.mother';
-import { ErroNaoEncontradoError } from '../errors/erro-nao-encontrado.error';
-import { ErroConflitoError } from '../errors/erro-conflito.error';
-import { ErroValidacaoError } from '../errors/erro-validacao.error';
+import { DisciplinaMother } from '../../../../tests/test-helpers/disciplina.mother';
+import { Curso } from "../../entities/curso/curso.entity";
+import { ICursoRepository } from '../../repositories/curso.repository';
+import { CursoMother } from '../../../../tests/test-helpers/curso.mother';
+import { ErroNaoEncontradoError } from '../../errors/erro-nao-encontrado.error';
+import { ErroConflitoError } from '../../errors/erro-conflito.error';
+import { ErroValidacaoError } from '../../errors/erro-validacao.error';
 
 describe('Disciplina Service - Testes unitários', () => {
   let disciplinaRepository: jest.Mocked<IDisciplinaRepository>
