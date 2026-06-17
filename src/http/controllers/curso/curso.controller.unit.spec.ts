@@ -11,13 +11,7 @@ describe('Curso Controller - Testes unitários', () => {
   let res: Response
 
   beforeEach(() => {
-    cursoService = {
-      buscar: jest.fn(),
-      buscarPorCodigo: jest.fn(),
-      cadastrar: jest.fn(),
-      editar: jest.fn(),
-      excluir: jest.fn(),
-    } as unknown as jest.Mocked<CursoService>
+    cursoService = CursoMother.criarServiceMock()
 
     controller = new CursoController(cursoService)
 

@@ -15,22 +15,9 @@ describe('Disciplina Controller - Testes unitários', () => {
   const curso = CursoMother.criar()
 
   beforeEach(() => {
-    disciplinaService = {
-      buscar: jest.fn(),
-      buscarPorCodigo: jest.fn(),
-      cadastrar: jest.fn(),
-      editar: jest.fn(),
-      excluir: jest.fn(),
-      excluirPorCurso: jest.fn(),
-    } as unknown as jest.Mocked<DisciplinaService>
+    disciplinaService = DisciplinaMother.criarServiceMock()
 
-    cursoService = {
-      buscar: jest.fn(),
-      buscarPorCodigo: jest.fn().mockResolvedValue(curso),
-      cadastrar: jest.fn(),
-      editar: jest.fn(),
-      excluir: jest.fn(),
-    } as unknown as jest.Mocked<CursoService>
+    cursoService = CursoMother.criarServiceMock(curso)
 
     controller = new DisciplinaController(disciplinaService, cursoService)
 
