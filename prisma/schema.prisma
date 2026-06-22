@@ -8,8 +8,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Os models (Semestre, Professor, Admin, Lecionamento, ...)
-// serão adicionados aqui conforme as entidades forem implementadas.
+model Usuario {
+  email String @id
+  cpf   String @unique
+  nome  String
+  senha String
+  role  String
+
+  professor Professor?
+
+  @@map("usuario")
+}
+
+model Professor {
+  matricula     String  @id
+  emailUsuario  String  @unique @map("email_usuario")
+  especialidade String?
+  titulacao     String?
+
+  usuario Usuario @relation(fields: [emailUsuario], references: [email])
+
+  @@map("professor")
+}
 
 model Curso {
   codigo   String @id
