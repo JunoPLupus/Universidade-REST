@@ -1,6 +1,7 @@
 import { Professor } from '../../src/domain/entities/professor/professor.entity';
 import { ProfessorFactory } from '../../src/domain/factories/professor.factory';
 import { IProfessorRepository } from '../../src/domain/repositories/professor.repository';
+import { ProfessorService } from '../../src/domain/services/professor/professor.service';
 import { UsuarioMother } from './usuario.mother';
 
 type ProfessorRawProps = {
@@ -56,5 +57,21 @@ export class ProfessorMother {
       atualizar: jest.fn(),
       excluir: jest.fn(),
     } as unknown as jest.Mocked<IProfessorRepository>
+  }
+
+  /**
+   * @param professor - Professor opcional a ser retornado por `buscarPorMatricula`.
+   * @returns Um mock de ProfessorService.
+   */
+  static criarServiceMock(professor?: Professor): jest.Mocked<ProfessorService> {
+    return {
+      buscar: jest.fn(),
+      buscarPorMatricula: professor === undefined
+        ? jest.fn()
+        : jest.fn().mockResolvedValue(professor),
+      cadastrar: jest.fn(),
+      atualizar: jest.fn(),
+      excluir: jest.fn(),
+    } as unknown as jest.Mocked<ProfessorService>
   }
 }
