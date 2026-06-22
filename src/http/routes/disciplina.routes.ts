@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import { disciplinaController } from '../../shared/container';
+import { verificarAutenticacao } from '../middlewares/auth/auth.middleware';
+import { exigirAdmin } from '../middlewares/auth/roles.middleware';
 
 const disciplinaRoutes : Router = Router()
 
@@ -183,7 +185,7 @@ disciplinaRoutes.get('/', disciplinaController.buscar.bind(disciplinaController)
  *               $ref: '#/components/schemas/ErroResposta'
  */
 //#endregion
-disciplinaRoutes.post('/', disciplinaController.cadastrar.bind(disciplinaController))
+disciplinaRoutes.post('/', verificarAutenticacao, exigirAdmin, disciplinaController.cadastrar.bind(disciplinaController))
 
 //#region Documentação: get '/disciplinas/{codigo}'
 /**
@@ -272,7 +274,7 @@ disciplinaRoutes.get('/:codigo', disciplinaController.buscarPorCodigo.bind(disci
  *               $ref: '#/components/schemas/ErroResposta'
  */
 //#endregion
-disciplinaRoutes.patch('/:codigo', disciplinaController.editar.bind(disciplinaController))
+disciplinaRoutes.patch('/:codigo', verificarAutenticacao, exigirAdmin, disciplinaController.editar.bind(disciplinaController))
 
 //#region Documentação: delete '/disciplinas/{codigo}'
 /**
@@ -296,10 +298,13 @@ disciplinaRoutes.patch('/:codigo', disciplinaController.editar.bind(disciplinaCo
  *          description: Disciplina não encontrada.
  *          content:
  *            application/json:
+ *          description: Disciplina nao encontrada.
+ *          content:
+ *            application/json:
  *              schema:
  *                $ref: '#/components/schemas/ErroResposta'
  */
 //#endregion
-disciplinaRoutes.delete('/:codigo', disciplinaController.excluir.bind(disciplinaController))
+disciplinaRoutes.delete('/:codigo', verificarAutenticacao, exigirAdmin, disciplinaController.excluir.bind(disciplinaController))
 
 export default disciplinaRoutes
