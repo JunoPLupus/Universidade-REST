@@ -26,8 +26,14 @@ export interface ILecionamentoRepository {
   /** Persiste um novo lecionamento. */
   cadastrar(lecionamento: Lecionamento): Promise<void>
 
-  /** Atualiza os dados de um lecionamento existente, identificado pelo seu código. */
-  editar(lecionamento: Lecionamento): Promise<void>
+  /**
+   * Atualiza os dados de um lecionamento existente.
+   *
+   * `codigoAntigo` identifica o registro a ser atualizado. `lecionamento.codigo`
+   * pode diferir de `codigoAntigo` quando o prefixo do código muda por alteração
+   * de `codSemestre` ou `codCurso` (via `codDisciplina`).
+   */
+  editar(codigoAntigo: string, lecionamento: Lecionamento): Promise<void>
 
   /** Remove um lecionamento pelo código. */
   excluir(codigo: string): Promise<void>

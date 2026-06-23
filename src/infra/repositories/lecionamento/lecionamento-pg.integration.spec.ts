@@ -133,7 +133,7 @@ describe('Implementação PostgreSQL de Lecionamento Repository - Testes de inte
   })
 
   describe('editar', () => {
-    it('atualiza os dados de um lecionamento existente', async () => {
+    it('atualiza os dados de um lecionamento mantendo o mesmo código', async () => {
       // Arrange
       await repository.cadastrar(lecionamento)
       const atualizado = LecionamentoMother.criar({
@@ -142,11 +142,30 @@ describe('Implementação PostgreSQL de Lecionamento Repository - Testes de inte
         diaSemana: 'Sex',
       })
       // Act
-      await repository.editar(atualizado)
+      await repository.editar(lecionamento.codigo, atualizado)
       // Assert
       const encontrado = await repository.buscarPorCodigo(lecionamento.codigo)
       expect(encontrado?.turno).toBe('Noite')
       expect(encontrado?.diaSemana).toBe('Sex')
+    })
+
+    it('atualiza o código do lecionamento quando o código muda', async () => {
+      // Arrange
+      await repository.cadastrar(lecionamento)
+      const novoSemestre = SemestreMother.criar({ ano: 2025, semestre: 2 })
+      await semestreRepository.cadastrar(novoSemestre)
+      const novoCodigo = `${novoSemestre.codigo}.${CursoMother.props().codigo}.001`
+      const atualizado = LecionamentoMother.criar({
+        codigo: novoCodigo,
+        codSemestre: novoSemestre.codigo,
+      })
+      // Act
+      await repository.editar(lecionamento.codigo, atualizado)
+      // Assert
+      expect(await repository.buscarPorCodigo(lecionamento.codigo)).toBeNull()
+      const encontrado = await repository.buscarPorCodigo(novoCodigo)
+      expect(encontrado?.codigo).toBe(novoCodigo)
+      expect(encontrado?.codSemestre).toBe(novoSemestre.codigo)
     })
   })
 

@@ -51,9 +51,9 @@ export class LecionamentoPgRepositoryImpl implements ILecionamentoRepository {
     await this.prisma.lecionamento.create({ data: LecionamentoMapper.toPersistence(lecionamento) })
   }
 
-  async editar(lecionamento: Lecionamento): Promise<void> {
+  async editar(codigoAntigo: string, lecionamento: Lecionamento): Promise<void> {
     await this.prisma.lecionamento.update({
-      where: { codigo: lecionamento.codigo },
+      where: { codigo: codigoAntigo },
       data: LecionamentoMapper.toPersistence(lecionamento),
     })
   }
