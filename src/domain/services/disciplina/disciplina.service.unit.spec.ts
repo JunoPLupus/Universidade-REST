@@ -224,9 +224,10 @@ describe('Disciplina Service - Testes unitários', () => {
   })
 
   describe('excluir', () => {
-    it('remove uma disciplina existente', async () => {
+    it('remove uma disciplina existente sem lecionamentos vinculados', async () => {
       // Arrange
       disciplinaRepository.buscarPorCodigo.mockResolvedValue(disciplina)
+      disciplinaRepository.existeLecionamentoVinculado.mockResolvedValue(false)
       // Act
       await service.excluir(disciplina.codigo)
       // Assert
@@ -239,6 +240,15 @@ describe('Disciplina Service - Testes unitários', () => {
       // Act
       await expect(service.excluir('999.999')).rejects.toThrow(ErroNaoEncontradoError)
       // Assert
+      expect(disciplinaRepository.excluir).not.toHaveBeenCalled()
+    })
+
+    it('lança ErroConflitoError ao tentar excluir disciplina com lecionamentos vinculados', async () => {
+      // Arrange
+      disciplinaRepository.buscarPorCodigo.mockResolvedValue(disciplina)
+      disciplinaRepository.existeLecionamentoVinculado.mockResolvedValue(true)
+      // Act & Assert
+      await expect(service.excluir(disciplina.codigo)).rejects.toThrow(ErroConflitoError)
       expect(disciplinaRepository.excluir).not.toHaveBeenCalled()
     })
   })

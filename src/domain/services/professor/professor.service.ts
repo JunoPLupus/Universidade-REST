@@ -10,6 +10,7 @@ import { professorMensagens } from '../../errors/mensagens/professor.mensagens';
 import { usuarioMensagens } from '../../errors/mensagens/usuario.mensagens';
 import { ErroConflitoError } from '../../errors/erro-conflito.error';
 import { garantirExistencia } from '../utils/garantir-existencia.util';
+import { lecionamentoMensagens } from '../../errors/mensagens/lecionamento.mensagens';
 import { gerarProximoCodigo } from '../utils/gerar-proximo-codigo.util';
 import { Email } from '../../value-objects/email/email.value-object';
 import { Cpf } from '../../value-objects/cpf/cpf.value-object';
@@ -179,9 +180,16 @@ export class ProfessorService {
    *
    * @param matricula - Matricula do professor a ser removido.
    * @throws ErroNaoEncontradoError se o professor nao existir.
+   * @throws ErroConflitoError se existir algum lecionamento vinculado ao professor.
    */
   async excluir(matricula: string): Promise<void> {
     await this.buscarPorMatricula(matricula)
+
+    const temLecionamento = await this.professorRepository.existeLecionamentoVinculado(matricula)
+    if (temLecionamento) {
+      throw new ErroConflitoError(lecionamentoMensagens.professorComLecionamento(matricula))
+    }
+
     await this.professorRepository.excluir(matricula)
   }
 }

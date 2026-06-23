@@ -224,9 +224,10 @@ describe('Professor Service - Testes unitarios', () => {
   })
 
   describe('excluir', () => {
-    it('remove um professor existente', async () => {
+    it('remove um professor existente sem lecionamentos vinculados', async () => {
       // Arrange
       professorRepository.buscarPorMatricula.mockResolvedValue(professor)
+      professorRepository.existeLecionamentoVinculado.mockResolvedValue(false)
       // Act
       await service.excluir(professor.matricula)
       // Assert
@@ -238,6 +239,15 @@ describe('Professor Service - Testes unitarios', () => {
       professorRepository.buscarPorMatricula.mockResolvedValue(null)
       // Act & Assert
       await expect(service.excluir('9999.999')).rejects.toThrow(ErroNaoEncontradoError)
+      expect(professorRepository.excluir).not.toHaveBeenCalled()
+    })
+
+    it('lanca ErroConflitoError ao tentar excluir professor com lecionamentos vinculados', async () => {
+      // Arrange
+      professorRepository.buscarPorMatricula.mockResolvedValue(professor)
+      professorRepository.existeLecionamentoVinculado.mockResolvedValue(true)
+      // Act & Assert
+      await expect(service.excluir(professor.matricula)).rejects.toThrow(ErroConflitoError)
       expect(professorRepository.excluir).not.toHaveBeenCalled()
     })
   })

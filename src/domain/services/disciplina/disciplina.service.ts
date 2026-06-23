@@ -11,6 +11,7 @@ import { gerarProximoCodigo } from '../utils/gerar-proximo-codigo.util';
 import { garantirExistencia } from '../utils/garantir-existencia.util';
 import { ErroConflitoError } from '../../errors/erro-conflito.error';
 import { ErroValidacaoError } from '../../errors/erro-validacao.error';
+import { lecionamentoMensagens } from '../../errors/mensagens/lecionamento.mensagens';
 
 /**
  * Service responsável pelas regras de negócio relacionadas a Disciplina.
@@ -154,16 +155,23 @@ export class DisciplinaService {
    * Remove uma disciplina pelo código.
    *
    * @throws ErroNaoEncontrado se não existir disciplina com o código informado.
+   * @throws ErroConflitoError se existir algum lecionamento vinculado à disciplina.
    */
   async excluir(codigo: string): Promise<void> {
     await this.buscarPorCodigo(codigo)
+
+    const temLecionamento = await this.disciplinaRepository.existeLecionamentoVinculado(codigo)
+    if (temLecionamento) {
+      throw new ErroConflitoError(lecionamentoMensagens.disciplinaComLecionamento(codigo))
+    }
+
     await this.disciplinaRepository.excluir(codigo)
   }
 
   /**
    * Remove todas as disciplinas vinculadas ao curso informado.
    *
-   * @throws ErroNaoEncontrado se não existir curso com o código informado.
+   * @throws ErroNaoEncontrado se nao existir curso com o codigo informado.
    */
   async excluirPorCurso(codCurso: string): Promise<void> {
     await garantirExistencia(
