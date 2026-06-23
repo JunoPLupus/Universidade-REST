@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
-import { env } from '../../../shared/config';
-import { ErroNaoAutenticadoError } from '../../../domain/errors/erro-nao-autenticado.error';
-import { authMensagens } from '../../../domain/errors/mensagens/auth.mensagens';
+import { env } from '../../../../shared/config';
+import { ErroNaoAutenticadoError } from '../../../../domain/errors/erro-nao-autenticado.error';
+import { authMensagens } from '../../../../domain/errors/mensagens/auth.mensagens';
 
 /**
  * Middleware que verifica se a requisicao possui um token JWT valido no

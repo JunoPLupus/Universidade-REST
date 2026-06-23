@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { ErroNaoAutorizadoError } from '../../../domain/errors/erro-nao-autorizado.error';
-import { authMensagens } from '../../../domain/errors/mensagens/auth.mensagens';
+import { ErroNaoAutorizadoError } from '../../../../domain/errors/erro-nao-autorizado.error';
+import { authMensagens } from '../../../../domain/errors/mensagens/auth.mensagens';
 
 /**
  * Middleware que restringe o acesso a usuarios com papel `ADMIN`.

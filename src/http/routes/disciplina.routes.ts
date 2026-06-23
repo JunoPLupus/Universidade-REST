@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { disciplinaController } from '../../shared/container';
-import { verificarAutenticacao } from '../middlewares/auth/auth.middleware';
-import { exigirAdmin } from '../middlewares/auth/roles.middleware';
+import { verificarAutenticacao } from '../middlewares/auth/verifica-autenticacao/verifica-autenticacao.middleware';
+import { exigirAdmin } from '../middlewares/auth/exige-admin/exige-admin.middleware';
 
 const disciplinaRoutes : Router = Router()
 
