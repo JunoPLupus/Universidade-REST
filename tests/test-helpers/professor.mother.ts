@@ -56,6 +56,7 @@ export class ProfessorMother {
       cadastrar: jest.fn(),
       atualizar: jest.fn(),
       excluir: jest.fn(),
+      existeLecionamentoVinculado: jest.fn(),
     } as unknown as jest.Mocked<IProfessorRepository>
   }
 
