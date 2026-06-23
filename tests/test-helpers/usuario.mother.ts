@@ -21,32 +21,25 @@ type UsuarioRawProps = {
 /**
  * Object Mother para a entidade Usuario.
  *
- * Centraliza a criação de dados válidos de Usuario para os testes,
- * permitindo sobrescrever apenas os campos relevantes para cada cenário.
+ * Centraliza a criacao de dados validos de Usuario para os testes,
+ * permitindo sobrescrever apenas os campos relevantes para cada cenario.
  * Usa `Usuario.criar` diretamente com `Senha.fromHash` para evitar o hash
- * assíncrono do BCrypt nos testes unitários.
+ * assíncrono do BCrypt nos testes unitarios.
  */
 export class UsuarioMother {
-  /**
-   * @returns Um conjunto de props válidas, com possibilidade de sobrescrita.
-   */
   static props(override: Partial<UsuarioRawProps> = {}): UsuarioRawProps {
     return {
       email: 'professor@universidade.edu.br',
       cpf: '529.982.247-25',
-      nome: 'João Silva',
+      nome: 'Joao Silva',
       senhaHash: '$2b$10$hashMockadoParaTestes',
       role: 'PROFESSOR',
       ...override,
     }
   }
 
-  /**
-   * @returns Uma instância de Usuario válida, com possibilidade de sobrescrita.
-   */
   static criar(override: Partial<UsuarioRawProps> = {}): Usuario {
     const p = this.props(override)
-
     return Usuario.criar({
       email: new Email(p.email),
       cpf: new Cpf(p.cpf),
@@ -56,22 +49,18 @@ export class UsuarioMother {
     })
   }
 
-  /**
-   * @returns Um mock de IUsuarioRepository.
-   */
   static criarRepositoryMock(): jest.Mocked<IUsuarioRepository> {
     return {
       buscarPorEmail: jest.fn(),
       buscarPorCpf: jest.fn(),
+      existePorEmail: jest.fn(),
+      existePorCpf: jest.fn(),
       cadastrar: jest.fn(),
       atualizar: jest.fn(),
       excluir: jest.fn(),
     } as unknown as jest.Mocked<IUsuarioRepository>
   }
 
-  /**
-   * @returns Um mock de AuthService.
-   */
   static criarAuthServiceMock(): jest.Mocked<AuthService> {
     return {
       login: jest.fn(),

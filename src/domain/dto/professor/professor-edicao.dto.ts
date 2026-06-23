@@ -1,12 +1,13 @@
 /**
- * Dados necessários para editar um professor existente.
+ * Dados necessarios para editar um professor existente.
  *
- * O professor a ser editado é identificado pela `matricula` informada
- * separadamente ao `ProfessorService.atualizar`. E-mail e CPF são
- * imutáveis após o cadastro. Todos os campos são opcionais: apenas os
- * informados são alterados.
+ * O professor a ser editado e identificado pela `matricula` informada
+ * separadamente ao `ProfessorService.atualizar`. Matricula, e-mail, CPF e role
+ * sao imutaveis apos o cadastro. Todos os campos sao opcionais: apenas os
+ * informados sao alterados.
  */
 export type ProfessorEdicaoDTO = {
+  nome?: string
   especialidade?: string
   titulacao?: string
   senha?: string

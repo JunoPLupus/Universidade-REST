@@ -89,6 +89,7 @@ export class ProfessorController {
    */
   async atualizar(req: Request, res: Response): Promise<void> {
     Validador.para(req.body)
+      .textoOpcional('nome')
       .textoOpcional('especialidade')
       .textoOpcional('titulacao')
       .textoOpcional('senha')
@@ -105,7 +106,7 @@ export class ProfessorController {
       throw new ErroNaoAutorizadoError(authMensagens.semPermissao())
     }
 
-    const dto: ProfessorEdicaoDTO = req.body
+    const dto: ProfessorEdicaoDTO = req.body ?? {}
 
     const professorAtualizado = await this.professorService.atualizar(matricula, dto)
 
