@@ -298,9 +298,6 @@ disciplinaRoutes.patch('/:codigo', verificarAutenticacao, exigirAdmin, disciplin
  *          description: Disciplina não encontrada.
  *          content:
  *            application/json:
- *          description: Disciplina nao encontrada.
- *          content:
- *            application/json:
  *              schema:
  *                $ref: '#/components/schemas/ErroResposta'
  */

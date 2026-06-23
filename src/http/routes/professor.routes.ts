@@ -6,6 +6,87 @@ import { exigirAdmin } from '../middlewares/auth/exige-admin/exige-admin.middlew
 
 const professorRoutes: Router = Router()
 
+//#region Schemas
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     Professor:
+ *       type: object
+ *       properties:
+ *         matricula:
+ *           type: string
+ *           example: "2026.001"
+ *         nome:
+ *           type: string
+ *           example: "Ana Lima"
+ *         cpf:
+ *           type: string
+ *           example: "123.456.789-09"
+ *         email:
+ *           type: string
+ *           example: "ana@uni.edu.br"
+ *         especialidade:
+ *           type: string
+ *           example: "Redes de Computadores"
+ *         titulacao:
+ *           type: string
+ *           enum: [LICENCIADO, ESPECIALISTA, MESTRE, DOUTOR]
+ *           example: "MESTRE"
+ *
+ *     ProfessorCadastroBody:
+ *       type: object
+ *       required:
+ *         - nome
+ *         - cpf
+ *         - email
+ *         - especialidade
+ *         - titulacao
+ *       properties:
+ *         nome:
+ *           type: string
+ *           minLength: 3
+ *           maxLength: 100
+ *           example: "Ana Lima"
+ *         cpf:
+ *           type: string
+ *           example: "123.456.789-09"
+ *         email:
+ *           type: string
+ *           example: "ana@uni.edu.br"
+ *         especialidade:
+ *           type: string
+ *           example: "Redes de Computadores"
+ *         titulacao:
+ *           type: string
+ *           enum: [LICENCIADO, ESPECIALISTA, MESTRE, DOUTOR]
+ *           example: "MESTRE"
+ *
+ *     ProfessorEdicaoBody:
+ *       type: object
+ *       minProperties: 1
+ *       properties:
+ *         nome:
+ *           type: string
+ *           minLength: 3
+ *           maxLength: 100
+ *           example: "Ana Lima"
+ *         cpf:
+ *           type: string
+ *           example: "123.456.789-09"
+ *         email:
+ *           type: string
+ *           example: "ana@uni.edu.br"
+ *         especialidade:
+ *           type: string
+ *           example: "Redes de Computadores"
+ *         titulacao:
+ *           type: string
+ *           enum: [LICENCIADO, ESPECIALISTA, MESTRE, DOUTOR]
+ *           example: "DOUTOR"
+ */
+//#endregion
+
 //#region Documentacao: get '/professores'
 /**
  * @openapi
@@ -67,6 +148,10 @@ professorRoutes.get('/', professorController.buscar.bind(professorController))
  *     tags:
  *       - Professores
  *     summary: Buscar professor por matricula
+ *     description: Retorna visão completa (matricula, cpf, email, especialidade, titulacao) para admin ou para o próprio professor. Retorna visão pública (matricula, nome) para demais casos.
+ *     security:
+ *       - bearerAuth: []
+ *       - {}
  *     parameters:
  *       - in: path
  *         name: mat
