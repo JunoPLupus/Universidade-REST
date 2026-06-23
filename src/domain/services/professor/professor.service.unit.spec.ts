@@ -5,6 +5,7 @@ import { ProfessorMother } from '../../../../tests/test-helpers/professor.mother
 import { UsuarioMother } from '../../../../tests/test-helpers/usuario.mother';
 import { ErroNaoEncontradoError } from '../../errors/erro-nao-encontrado.error';
 import { ErroConflitoError } from '../../errors/erro-conflito.error';
+import { ErroValidacaoError } from '../../errors/erro-validacao.error';
 
 jest.mock('../../factories/usuario.factory')
 import { UsuarioFactory } from '../../factories/usuario.factory';
@@ -13,7 +14,6 @@ describe('Professor Service - Testes unitarios', () => {
   let professorRepository: jest.Mocked<IProfessorRepository>
   let usuarioRepository: jest.Mocked<IUsuarioRepository>
   let service: ProfessorService
-
   const anoAtual = new Date().getFullYear()
   const professor = ProfessorMother.criar()
   const usuario = UsuarioMother.criar()
@@ -28,8 +28,8 @@ describe('Professor Service - Testes unitarios', () => {
   describe('cadastrar', () => {
     it('cadastra um professor com a primeira matricula do ano quando nao ha registros no ano', async () => {
       // Arrange
-      usuarioRepository.buscarPorEmail.mockResolvedValue(null)
-      usuarioRepository.buscarPorCpf.mockResolvedValue(null)
+      usuarioRepository.existePorEmail.mockResolvedValue(false)
+      usuarioRepository.existePorCpf.mockResolvedValue(false)
       professorRepository.buscarUltimaMatriculaDoAno.mockResolvedValue(null)
       // Act
       const criado = await service.cadastrar({
@@ -47,8 +47,8 @@ describe('Professor Service - Testes unitarios', () => {
 
     it('gera o proximo numero sequencial a partir da ultima matricula do ano', async () => {
       // Arrange
-      usuarioRepository.buscarPorEmail.mockResolvedValue(null)
-      usuarioRepository.buscarPorCpf.mockResolvedValue(null)
+      usuarioRepository.existePorEmail.mockResolvedValue(false)
+      usuarioRepository.existePorCpf.mockResolvedValue(false)
       professorRepository.buscarUltimaMatriculaDoAno.mockResolvedValue(`${anoAtual}.003`)
       // Act
       const criado = await service.cadastrar({
@@ -61,9 +61,33 @@ describe('Professor Service - Testes unitarios', () => {
       expect(criado.matricula).toBe(`${anoAtual}.004`)
     })
 
+    it('lanca ErroValidacaoError se o e-mail tiver formato invalido, antes de consultar o banco', async () => {
+      // Act & Assert
+      await expect(service.cadastrar({
+        email: 'email-invalido-sem-arroba',
+        cpf: professor.cpf,
+        nome: professor.nome,
+        senha: 'senha123',
+      })).rejects.toThrow(ErroValidacaoError)
+      expect(usuarioRepository.existePorEmail).not.toHaveBeenCalled()
+      expect(usuarioRepository.existePorCpf).not.toHaveBeenCalled()
+    })
+
+    it('lanca ErroValidacaoError se o CPF tiver formato invalido, antes de consultar o banco', async () => {
+      // Act & Assert
+      await expect(service.cadastrar({
+        email: professor.emailUsuario,
+        cpf: '000.000.000-00',
+        nome: professor.nome,
+        senha: 'senha123',
+      })).rejects.toThrow(ErroValidacaoError)
+      expect(usuarioRepository.existePorEmail).not.toHaveBeenCalled()
+      expect(usuarioRepository.existePorCpf).not.toHaveBeenCalled()
+    })
+
     it('lanca ErroConflitoError se o e-mail ja estiver em uso', async () => {
       // Arrange
-      usuarioRepository.buscarPorEmail.mockResolvedValue(usuario)
+      usuarioRepository.existePorEmail.mockResolvedValue(true)
       // Act & Assert
       await expect(service.cadastrar({
         email: professor.emailUsuario,
@@ -76,8 +100,8 @@ describe('Professor Service - Testes unitarios', () => {
 
     it('lanca ErroConflitoError se o CPF ja estiver em uso', async () => {
       // Arrange
-      usuarioRepository.buscarPorEmail.mockResolvedValue(null)
-      usuarioRepository.buscarPorCpf.mockResolvedValue(usuario)
+      usuarioRepository.existePorEmail.mockResolvedValue(false)
+      usuarioRepository.existePorCpf.mockResolvedValue(true)
       // Act & Assert
       await expect(service.cadastrar({
         email: professor.emailUsuario,
@@ -135,6 +159,36 @@ describe('Professor Service - Testes unitarios', () => {
       expect(usuarioRepository.atualizar).not.toHaveBeenCalled()
     })
 
+    it('atualiza o nome do professor e do usuario vinculado sem re-hashear a senha', async () => {
+      // Arrange
+      professorRepository.buscarPorMatricula.mockResolvedValue(professor)
+      usuarioRepository.buscarPorEmail.mockResolvedValue(usuario)
+      // Act
+      const atualizado = await service.atualizar(professor.matricula, { nome: 'Carlos Souza' })
+      // Assert
+      expect(atualizado.nome).toBe('Carlos Souza')
+      expect(usuarioRepository.atualizar).toHaveBeenCalledWith(
+        expect.objectContaining({ nome: 'Carlos Souza' }),
+      )
+      // UsuarioFactory.criar NAO deve ser chamado (evita duplo hash da senha)
+      expect(UsuarioFactory.criar).not.toHaveBeenCalled()
+    })
+
+    it('atualiza a senha e o nome do usuario vinculado quando ambos sao informados', async () => {
+      // Arrange
+      professorRepository.buscarPorMatricula.mockResolvedValue(professor)
+      usuarioRepository.buscarPorEmail.mockResolvedValue(usuario)
+      // Act
+      await service.atualizar(professor.matricula, { nome: 'Carlos Souza', senha: 'novaSenha123' })
+      // Assert
+      expect(UsuarioFactory.criar).toHaveBeenCalledWith(expect.objectContaining({
+        email: professor.emailUsuario,
+        nome: 'Carlos Souza',
+        senha: 'novaSenha123',
+      }))
+      expect(usuarioRepository.atualizar).toHaveBeenCalledWith(usuario)
+    })
+
     it('atualiza a senha do usuario vinculado quando senha e informada', async () => {
       // Arrange
       professorRepository.buscarPorMatricula.mockResolvedValue(professor)
@@ -149,7 +203,7 @@ describe('Professor Service - Testes unitarios', () => {
       expect(usuarioRepository.atualizar).toHaveBeenCalledWith(usuario)
     })
 
-    it('mantém os valores atuais para campos nao informados no DTO', async () => {
+    it('mantem os valores atuais para campos nao informados no DTO', async () => {
       // Arrange
       professorRepository.buscarPorMatricula.mockResolvedValue(professor)
       // Act
@@ -157,6 +211,7 @@ describe('Professor Service - Testes unitarios', () => {
       // Assert
       expect(atualizado.titulacao).toBe('DOUTOR')
       expect(atualizado.especialidade).toBe(professor.especialidade)
+      expect(atualizado.nome).toBe(professor.nome)
     })
 
     it('lanca ErroNaoEncontradoError ao atualizar professor inexistente', async () => {

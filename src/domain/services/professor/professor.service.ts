@@ -1,4 +1,5 @@
 import { Professor } from '../../entities/professor/professor.entity';
+import { Usuario } from '../../entities/usuario/usuario.entity';
 import { ProfessorFactory } from '../../factories/professor.factory';
 import { UsuarioFactory } from '../../factories/usuario.factory';
 import { ProfessorCadastroDTO } from '../../dto/professor/professor-cadastro.dto';
@@ -10,6 +11,14 @@ import { usuarioMensagens } from '../../errors/mensagens/usuario.mensagens';
 import { ErroConflitoError } from '../../errors/erro-conflito.error';
 import { garantirExistencia } from '../utils/garantir-existencia.util';
 import { gerarProximoCodigo } from '../utils/gerar-proximo-codigo.util';
+import { Email } from '../../value-objects/email/email.value-object';
+import { Cpf } from '../../value-objects/cpf/cpf.value-object';
+import { Texto } from '../../value-objects/texto/texto.value-object';
+import { Senha } from '../../value-objects/senha/senha.value-object';
+import { Role } from '../../entities/usuario/usuario.props';
+
+const NOME_MIN = 5
+const NOME_MAX = 60
 
 /**
  * Service responsavel pelas regras de negocio relacionadas a Professor.
@@ -29,20 +38,24 @@ export class ProfessorService {
   /**
    * Cadastra um novo professor e o usuario vinculado.
    *
+   * Valida os formatos de e-mail e CPF antes de consultar o banco,
+   * garantindo que erros de formato aparecem antes de erros de unicidade.
    * Gera a matricula sequencial no formato `AnoAtual.000` automaticamente.
-   * Cria os registros de `usuario` e `professor` em uma unica transacao.
    *
    * @param dto - Dados do professor e do usuario vinculado.
    * @returns A entidade `Professor` criada.
+   * @throws ErroValidacaoError se e-mail ou CPF tiverem formato invalido.
    * @throws ErroConflitoError se o e-mail ou o CPF ja estiverem em uso.
-   * @throws ErroValidacaoError se qualquer campo violar as invariantes do dominio.
    */
   async cadastrar(dto: ProfessorCadastroDTO): Promise<Professor> {
-    const emailEmUso = await this.usuarioRepository.buscarPorEmail(dto.email)
-    if (emailEmUso) throw new ErroConflitoError(usuarioMensagens.emailInvalido(dto.email))
+    new Email(dto.email)
+    new Cpf(dto.cpf)
 
-    const cpfEmUso = await this.usuarioRepository.buscarPorCpf(dto.cpf)
-    if (cpfEmUso) throw new ErroConflitoError(usuarioMensagens.cpfInvalido())
+    const emailEmUso = await this.usuarioRepository.existePorEmail(dto.email)
+    if (emailEmUso) throw new ErroConflitoError(usuarioMensagens.emailJaEmUso())
+
+    const cpfEmUso = await this.usuarioRepository.existePorCpf(dto.cpf)
+    if (cpfEmUso) throw new ErroConflitoError(usuarioMensagens.cpfJaEmUso())
 
     const anoAtual = new Date().getFullYear()
     const ultimaMatricula = await this.professorRepository.buscarUltimaMatriculaDoAno(anoAtual)
@@ -95,9 +108,13 @@ export class ProfessorService {
   /**
    * Atualiza os dados de um professor existente.
    *
-   * Atualiza `especialidade` e `titulacao` na tabela `professor`. Se
-   * `senha` for informada, atualiza tambem o usuario vinculado na
-   * tabela `usuario`. E-mail e CPF sao imutaveis apos o cadastro.
+   * Campos editaveis: `nome`, `especialidade`, `titulacao` e `senha`.
+   * Matricula, e-mail, CPF e role sao imutaveis apos o cadastro.
+   *
+   * Quando `senha` e informada, o usuario vinculado e recriado via
+   * `UsuarioFactory.criar` para que a nova senha seja hasheada.
+   * Quando apenas `nome` muda (sem nova senha), o usuario e atualizado
+   * via `Usuario.criar` com `Senha.fromHash` para evitar duplo hash.
    * Campos nao informados mantem o valor atual.
    *
    * @param matricula - Matricula do professor a ser atualizado.
@@ -109,16 +126,33 @@ export class ProfessorService {
   async atualizar(matricula: string, dto: ProfessorEdicaoDTO): Promise<Professor> {
     const existente = await this.buscarPorMatricula(matricula)
 
-    if (dto.senha) {
+    const novoNome = dto.nome ?? existente.nome
+
+    if (dto.senha || dto.nome) {
       const usuarioAtual = await this.usuarioRepository.buscarPorEmail(existente.emailUsuario)
       if (usuarioAtual) {
-        const usuarioAtualizado = await UsuarioFactory.criar({
-          email: usuarioAtual.email,
-          cpf: usuarioAtual.cpf,
-          nome: usuarioAtual.nome,
-          senha: dto.senha,
-          role: usuarioAtual.role,
-        })
+        let usuarioAtualizado: Usuario
+
+        if (dto.senha) {
+          // Nova senha informada: recria via factory para hashear a senha
+          usuarioAtualizado = await UsuarioFactory.criar({
+            email: usuarioAtual.email,
+            cpf: usuarioAtual.cpf,
+            nome: novoNome,
+            senha: dto.senha,
+            role: usuarioAtual.role,
+          })
+        } else {
+          // Apenas nome alterado: preserva o hash atual sem re-hashear
+          usuarioAtualizado = Usuario.criar({
+            email: new Email(usuarioAtual.email),
+            cpf: new Cpf(usuarioAtual.cpf),
+            nome: new Texto(novoNome, usuarioMensagens.nomeInvalido(NOME_MIN, NOME_MAX), NOME_MIN, NOME_MAX),
+            senha: Senha.fromHash(usuarioAtual.senha),
+            role: usuarioAtual.role as Role,
+          })
+        }
+
         await this.usuarioRepository.atualizar(usuarioAtualizado)
       }
     }
@@ -126,7 +160,7 @@ export class ProfessorService {
     const professorAtualizado = ProfessorFactory.criar({
       matricula,
       emailUsuario: existente.emailUsuario,
-      nome: existente.nome,
+      nome: novoNome,
       cpf: existente.cpf,
       especialidade: dto.especialidade ?? existente.especialidade,
       titulacao: dto.titulacao ?? existente.titulacao,
