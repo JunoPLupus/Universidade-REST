@@ -26,7 +26,8 @@ model Professor {
   especialidade String?
   titulacao     String?
 
-  usuario Usuario @relation(fields: [emailUsuario], references: [email])
+  usuario       Usuario        @relation(fields: [emailUsuario], references: [email])
+  lecionamentos Lecionamento[]
 
   @@map("professor")
 }
@@ -48,9 +49,35 @@ model Disciplina {
   nome         String
   cargaHoraria Int    @map("carga_horaria")
 
-  curso Curso @relation(fields: [codCurso], references: [codigo])
+  curso         Curso          @relation(fields: [codCurso], references: [codigo])
+  lecionamentos Lecionamento[]
 
   // O nome da disciplina não pode se repetir dentro do mesmo curso.
   @@unique([codCurso, nome])
   @@map("disciplina")
+}
+
+model Semestre {
+  codigo   String @id
+  ano      Int
+  semestre Int
+
+  lecionamentos Lecionamento[]
+
+  @@map("semestre")
+}
+
+model Lecionamento {
+  codigo        String @id
+  codDisciplina String @map("cod_disciplina")
+  matProfessor  String @map("mat_professor")
+  codSemestre   String @map("cod_semestre")
+  turno         String
+  diaSemana     String @map("dia_semana")
+
+  disciplina Disciplina @relation(fields: [codDisciplina], references: [codigo])
+  professor  Professor  @relation(fields: [matProfessor], references: [matricula])
+  semestre   Semestre   @relation(fields: [codSemestre], references: [codigo])
+
+  @@map("lecionamento")
 }
