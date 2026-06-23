@@ -9,7 +9,7 @@ image:https://img.shields.io/badge/Express-5-grey?logo=express&logoColor=white&l
 image:https://img.shields.io/badge/Prisma-5-grey?logo=prisma&logoColor=white&labelColor=2D3748[Prisma]
 image:https://img.shields.io/badge/PostgreSQL-16-grey?logo=postgresql&logoColor=white&labelColor=4169E1[PostgreSQL]
 
-API REST para gestão de cursos, disciplinas e professores, com autenticação JWT. Construída com Node.js, TypeScript, Express e PostgreSQL (via Prisma ORM).
+API REST para gestão de cursos, disciplinas, professores e lecionamentos, com autenticação JWT. Construída com Node.js, TypeScript, Express e PostgreSQL (via Prisma ORM).
 
 == Pré-requisitos
 
@@ -52,11 +52,9 @@ cp .env.example .env
 # Instalar dependências
 npm install
 
-# Gerar o Prisma Client
-npm run prisma:generate
-
-# Aplicar as migrations no banco principal
-npm run prisma:migrate
+# Aplicar as migrations no banco principal (cria as tabelas e gera o Prisma Client)
+npx prisma migrate deploy
+npx prisma generate
 
 # Iniciar em modo desenvolvimento (hot reload)
 npm run dev
@@ -68,6 +66,23 @@ npm start
 
 A API estará disponível em http://localhost:3000. +
 A documentação Swagger estará em http://localhost:3000/docs.
+
+=== Banco de testes
+
+O banco de testes é controlado pela variável `DATABASE_URL_TEST` no `.env`. Como ele não possui histórico de migrations, use `prisma db push` para criar as tabelas:
+
+[source,bash]
+----
+# Linux / macOS
+DATABASE_URL="<valor de DATABASE_URL_TEST>" npx prisma db push
+
+# Windows (PowerShell)
+$env:DATABASE_URL="<valor de DATABASE_URL_TEST>"; npx prisma db push
+----
+
+Substitua `<valor de DATABASE_URL_TEST>` pela string de conexão do banco de testes (ex.: `postgresql://postgres:senha@localhost:5432/universidade_test?schema=public`).
+
+NOTE: O banco de testes é limpo automaticamente antes de cada execução dos testes de integração. Não é necessário populá-lo manualmente.
 
 == Rodando com Docker
 
@@ -85,12 +100,14 @@ NOTE: O container não inclui o PostgreSQL. Use um banco externo ou suba um via 
 
 == Testes
 
+Antes de rodar os testes de integração pela primeira vez (ou após clonar o repositório em outra máquina), configure o banco de testes conforme descrito em <<banco-de-testes, Banco de testes>>.
+
 [source,bash]
 ----
 # Testes unitários
 npm run test:unit
 
-# Testes de integração (requer DATABASE_URL_TEST configurada)
+# Testes de integração (requer DATABASE_URL_TEST configurada e banco de testes criado)
 npm run test:integration
 
 # Todos os testes
@@ -143,13 +160,13 @@ Níveis de acesso:
 
 | `GET`
 | `/professores`
-| Listar professores (filtros opcionais)
+| Listar professores (filtros opcionais) — retorna sempre a visão pública `{ matricula, nome }`
 | Público
 
 | `GET`
 | `/professores/:mat`
-| Buscar professor por matrícula
-| Público
+| Buscar professor por matrícula — retorna visão completa para admin ou para o próprio professor; visão pública `{ matricula, nome }` para demais casos
+| Público (resposta condicional)
 
 | `POST`
 | `/professores`
@@ -233,6 +250,38 @@ Níveis de acesso:
 | `DELETE`
 | `/disciplinas/:codigo`
 | Excluir disciplina
+| Admin
+|===
+
+=== Lecionamentos
+
+[cols="1,2,2,1", options="header"]
+|===
+| Método | Rota | Descrição | Acesso
+
+| `GET`
+| `/lecionamentos`
+| Listar lecionamentos (filtros opcionais: `codigo`, `codDisciplina`, `matProfessor`, `codSemestre`, `turno`, `diaSemana`)
+| Público
+
+| `GET`
+| `/lecionamentos/:codigo`
+| Buscar lecionamento por código
+| Público
+
+| `POST`
+| `/lecionamentos`
+| Cadastrar lecionamento — código gerado automaticamente; semestre criado automaticamente se não existir
+| Admin
+
+| `PATCH`
+| `/lecionamentos/:codigo`
+| Editar lecionamento (campos opcionais) — código recalculado se semestre ou disciplina forem alterados
+| Admin
+
+| `DELETE`
+| `/lecionamentos/:codigo`
+| Excluir lecionamento
 | Admin
 |===
 
