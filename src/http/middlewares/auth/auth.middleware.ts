@@ -16,7 +16,7 @@ export function verificarAutenticacao(req: Request, _res: Response, next: NextFu
   const authHeader = req.headers.authorization
 
   if (!authHeader?.startsWith('Bearer ')) {
-    throw new ErroNaoAutenticadoError(authMensagens.credenciaisInvalidas())
+    throw new ErroNaoAutenticadoError(authMensagens.naoAutenticado())
   }
 
   const token = authHeader.slice(7)
@@ -26,6 +26,6 @@ export function verificarAutenticacao(req: Request, _res: Response, next: NextFu
     req.user = { email: payload.sub, role: payload.role }
     next()
   } catch {
-    throw new ErroNaoAutenticadoError(authMensagens.credenciaisInvalidas())
+    throw new ErroNaoAutenticadoError(authMensagens.naoAutenticado())
   }
 }
