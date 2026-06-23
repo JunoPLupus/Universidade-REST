@@ -59,6 +59,34 @@ describe('Implementacao PostgreSQL de Usuario Repository - Testes de integracao'
     })
   })
 
+  describe('existePorEmail', () => {
+    it('retorna false quando nao existe usuario com o email informado', async () => {
+      const existe = await repository.existePorEmail('inexistente@email.com')
+      expect(existe).toBe(false)
+    })
+
+    it('retorna true quando existe usuario com o email informado', async () => {
+      await repository.cadastrar(usuario)
+
+      const existe = await repository.existePorEmail(usuario.email)
+      expect(existe).toBe(true)
+    })
+  })
+
+  describe('existePorCpf', () => {
+    it('retorna false quando nao existe usuario com o CPF informado', async () => {
+      const existe = await repository.existePorCpf('529.982.247-25')
+      expect(existe).toBe(false)
+    })
+
+    it('retorna true quando existe usuario com o CPF informado', async () => {
+      await repository.cadastrar(usuario)
+
+      const existe = await repository.existePorCpf(usuario.cpf)
+      expect(existe).toBe(true)
+    })
+  })
+
   describe('atualizar', () => {
     it('atualiza os dados de um usuario existente', async () => {
       await repository.cadastrar(usuario)

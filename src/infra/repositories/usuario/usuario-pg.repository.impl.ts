@@ -19,6 +19,16 @@ export class UsuarioPgRepositoryImpl implements IUsuarioRepository {
     return registro ? UsuarioMapper.toDomain(registro) : null
   }
 
+  async existePorEmail(email: string): Promise<boolean> {
+    const count = await this.prisma.usuario.count({ where: { email } })
+    return count > 0
+  }
+
+  async existePorCpf(cpf: string): Promise<boolean> {
+    const count = await this.prisma.usuario.count({ where: { cpf } })
+    return count > 0
+  }
+
   async cadastrar(usuario: Usuario): Promise<void> {
     await this.prisma.usuario.create({ data: UsuarioMapper.toPersistence(usuario) })
   }
