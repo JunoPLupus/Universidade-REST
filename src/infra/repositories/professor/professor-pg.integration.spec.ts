@@ -2,10 +2,22 @@ import { limparTabelas, prismaTest } from '../../../../tests/test-helpers/prisma
 import { Professor } from '../../../domain/entities/professor/professor.entity';
 import { ProfessorMother } from '../../../../tests/test-helpers/professor.mother';
 import { UsuarioMother } from '../../../../tests/test-helpers/usuario.mother';
+import { CursoMother } from '../../../../tests/test-helpers/curso.mother';
+import { DisciplinaMother } from '../../../../tests/test-helpers/disciplina.mother';
+import { SemestreMother } from '../../../../tests/test-helpers/semestre.mother';
+import { LecionamentoMother } from '../../../../tests/test-helpers/lecionamento.mother';
 import { ProfessorPgRepositoryImpl } from './professor-pg.repository.impl';
+import { CursoPgRepositoryImpl } from '../curso/curso-pg.repository.impl';
+import { DisciplinaPgRepositoryImpl } from '../disciplina/disciplina-pg.repository.impl';
+import { SemestrePgRepositoryImpl } from '../semestre/semestre-pg.repository.impl';
+import { LecionamentoPgRepositoryImpl } from '../lecionamento/lecionamento-pg.repository.impl';
 
 describe('Implementacao PostgreSQL de Professor Repository - Testes de integracao', () => {
   const repository = new ProfessorPgRepositoryImpl(prismaTest)
+  const cursoRepository = new CursoPgRepositoryImpl(prismaTest)
+  const disciplinaRepository = new DisciplinaPgRepositoryImpl(prismaTest)
+  const semestreRepository = new SemestrePgRepositoryImpl(prismaTest)
+  const lecionamentoRepository = new LecionamentoPgRepositoryImpl(prismaTest)
   let professor: Professor
 
   beforeEach(async () => {
@@ -171,6 +183,30 @@ describe('Implementacao PostgreSQL de Professor Repository - Testes de integraca
     it('nao lanca erro ao tentar excluir matricula inexistente', async () => {
       // Arrange & Act & Assert
       await expect(repository.excluir('9999.99')).resolves.not.toThrow()
+    })
+  })
+
+  describe('existeLecionamentoVinculado', () => {
+    it('retorna false quando nenhum lecionamento esta vinculado ao professor', async () => {
+      // Arrange
+      await repository.cadastrar(professor, UsuarioMother.criar())
+      // Act
+      const existe = await repository.existeLecionamentoVinculado(professor.matricula)
+      // Assert
+      expect(existe).toBe(false)
+    })
+
+    it('retorna true quando existe ao menos um lecionamento vinculado ao professor', async () => {
+      // Arrange
+      await repository.cadastrar(professor, UsuarioMother.criar())
+      await cursoRepository.cadastrar(CursoMother.criar())
+      await disciplinaRepository.cadastrar(DisciplinaMother.criar())
+      await semestreRepository.cadastrar(SemestreMother.criar())
+      await lecionamentoRepository.cadastrar(LecionamentoMother.criar())
+      // Act
+      const existe = await repository.existeLecionamentoVinculado(professor.matricula)
+      // Assert
+      expect(existe).toBe(true)
     })
   })
 })

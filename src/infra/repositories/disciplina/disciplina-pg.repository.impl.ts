@@ -81,4 +81,9 @@ export class DisciplinaPgRepositoryImpl implements IDisciplinaRepository {
   async excluirPorCurso(codCurso: string): Promise<void> {
     await this.prisma.disciplina.deleteMany({ where: { codCurso } })
   }
+
+  async existeLecionamentoVinculado(codigo: string): Promise<boolean> {
+    const count = await this.prisma.lecionamento.count({ where: { codDisciplina: codigo } })
+    return count > 0
+  }
 }

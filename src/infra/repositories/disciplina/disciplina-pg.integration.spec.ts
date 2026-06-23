@@ -2,11 +2,21 @@ import { limparTabelas, prismaTest } from '../../../../tests/test-helpers/prisma
 import { CursoMother } from '../../../../tests/test-helpers/curso.mother';
 import { Disciplina } from "../../../domain/entities/disciplina/disciplina.entity";
 import { DisciplinaMother } from '../../../../tests/test-helpers/disciplina.mother';
+import { ProfessorMother } from '../../../../tests/test-helpers/professor.mother';
+import { UsuarioMother } from '../../../../tests/test-helpers/usuario.mother';
+import { SemestreMother } from '../../../../tests/test-helpers/semestre.mother';
+import { LecionamentoMother } from '../../../../tests/test-helpers/lecionamento.mother';
 import { CursoPgRepositoryImpl } from '../curso/curso-pg.repository.impl';
 import { DisciplinaPgRepositoryImpl } from './disciplina-pg.repository.impl';
+import { ProfessorPgRepositoryImpl } from '../professor/professor-pg.repository.impl';
+import { SemestrePgRepositoryImpl } from '../semestre/semestre-pg.repository.impl';
+import { LecionamentoPgRepositoryImpl } from '../lecionamento/lecionamento-pg.repository.impl';
 
 describe('Implementação PostgreSQL de Disciplina Repository - Testes de integração', () => {
   const cursoRepository = new CursoPgRepositoryImpl(prismaTest)
+  const professorRepository = new ProfessorPgRepositoryImpl(prismaTest)
+  const semestreRepository = new SemestrePgRepositoryImpl(prismaTest)
+  const lecionamentoRepository = new LecionamentoPgRepositoryImpl(prismaTest)
   const repository = new DisciplinaPgRepositoryImpl(prismaTest)
   let disciplina : Disciplina = DisciplinaMother.criar()
 
@@ -185,6 +195,30 @@ describe('Implementação PostgreSQL de Disciplina Repository - Testes de integr
       // Assert
       const disciplinas = await repository.buscar({ codCurso })
       expect(disciplinas).toHaveLength(0)
+    })
+  })
+
+  describe('existeLecionamentoVinculado', () => {
+    it('retorna false quando nenhum lecionamento está vinculado à disciplina', async () => {
+      // Arrange
+      await repository.cadastrar(disciplina)
+      // Act
+      const existe = await repository.existeLecionamentoVinculado(disciplina.codigo)
+      // Assert
+      expect(existe).toBe(false)
+    })
+
+    it('retorna true quando existe ao menos um lecionamento vinculado à disciplina', async () => {
+      // Arrange
+      await repository.cadastrar(disciplina)
+      const professor = ProfessorMother.criar()
+      await professorRepository.cadastrar(professor, UsuarioMother.criar())
+      await semestreRepository.cadastrar(SemestreMother.criar())
+      await lecionamentoRepository.cadastrar(LecionamentoMother.criar())
+      // Act
+      const existe = await repository.existeLecionamentoVinculado(disciplina.codigo)
+      // Assert
+      expect(existe).toBe(true)
     })
   })
 })
