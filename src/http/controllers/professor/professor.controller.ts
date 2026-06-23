@@ -21,7 +21,9 @@ export class ProfessorController {
   /**
    * Lista professores, com filtros opcionais via query string.
    *
-   * @returns 200 com a lista de professores no formato `ProfessorRespostaDTO[]`.
+   * Sempre retorna a visão pública — independente de quem fez a requisição.
+   *
+   * @returns 200 com a lista de professores no formato `ProfessorRespostaPublicaDTO[]`.
    */
   async buscar(req: Request, res: Response): Promise<void> {
     const { matricula, email, nome, cpf, especialidade, titulacao } = req.query
@@ -35,12 +37,17 @@ export class ProfessorController {
       titulacao: paraFiltroString(titulacao),
     })
 
-    res.status(200).json(professores.map(ProfessorRespostaMapper.paraResposta))
+    res.status(200).json(professores.map(ProfessorRespostaMapper.paraRespostaPublica))
   }
 
   /**
+   * Busca um professor pela matrícula.
+   *
+   * Retorna a visão completa para admin ou para o próprio professor dono do registro.
+   * Retorna a visão pública para requisições não autenticadas ou de outros professores.
+   *
    * @param req.params.mat - Matricula do professor buscado.
-   * @returns 200 com o professor no formato `ProfessorRespostaDTO`.
+   * @returns 200 com o professor no formato `ProfessorRespostaDTO` ou `ProfessorRespostaPublicaDTO`.
    * @throws ErroNaoEncontradoError (404) se nao existir professor com a matricula informada.
    */
   async buscarPorMatricula(req: Request, res: Response): Promise<void> {
@@ -48,7 +55,14 @@ export class ProfessorController {
 
     const professor = await this.professorService.buscarPorMatricula(matricula)
 
-    res.status(200).json(ProfessorRespostaMapper.paraResposta(professor))
+    const ehAdmin = req.user?.role === 'ADMIN'
+    const ehOProprioUsuario = professor.emailUsuario === req.user?.email
+
+    const resposta = (ehAdmin || ehOProprioUsuario)
+      ? ProfessorRespostaMapper.paraResposta(professor)
+      : ProfessorRespostaMapper.paraRespostaPublica(professor)
+
+    res.status(200).json(resposta)
   }
 
   /**

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { professorController } from '../../shared/container';
 import { verificarAutenticacao } from '../middlewares/auth/verifica-autenticacao/verifica-autenticacao.middleware';
+import { tentarAutenticacao } from '../middlewares/auth/tentar-autenticacao/tentar-autenticacao.middleware';
 import { exigirAdmin } from '../middlewares/auth/exige-admin/exige-admin.middleware';
 
 const professorRoutes: Router = Router()
@@ -88,7 +89,7 @@ professorRoutes.get('/', professorController.buscar.bind(professorController))
  *               $ref: '#/components/schemas/ErroResposta'
  */
 //#endregion
-professorRoutes.get('/:mat', professorController.buscarPorMatricula.bind(professorController))
+professorRoutes.get('/:mat', tentarAutenticacao, professorController.buscarPorMatricula.bind(professorController))
 
 //#region Documentacao: post '/professores'
 /**

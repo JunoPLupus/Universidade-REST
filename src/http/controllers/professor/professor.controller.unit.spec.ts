@@ -22,7 +22,7 @@ describe('Professor Controller - Testes unitarios', () => {
   })
 
   describe('buscar', () => {
-    it('deve retornar 200 com a lista de professores', async () => {
+    it('deve retornar 200 com a lista de professores na visão pública', async () => {
       // Arrange
       professorService.buscar.mockResolvedValue([professor])
       const req = { query: { nome: 'Ana' } } as unknown as Request
@@ -31,18 +31,56 @@ describe('Professor Controller - Testes unitarios', () => {
       // Assert
       expect(professorService.buscar).toHaveBeenCalledWith(expect.objectContaining({ nome: 'Ana' }))
       expect(res.status).toHaveBeenCalledWith(200)
-      expect(res.json).toHaveBeenCalledWith([ProfessorRespostaMapper.paraResposta(professor)])
+      expect(res.json).toHaveBeenCalledWith([ProfessorRespostaMapper.paraRespostaPublica(professor)])
     })
   })
 
   describe('buscarPorMatricula', () => {
-    it('deve retornar 200 com o professor', async () => {
+    it('retorna visão pública para requisição não autenticada', async () => {
       // Arrange
-      const req = { params: { mat: professor.matricula } } as unknown as Request
+      const req = { params: { mat: professor.matricula }, user: undefined } as unknown as Request
       // Act
       await controller.buscarPorMatricula(req, res)
       // Assert
-      expect(professorService.buscarPorMatricula).toHaveBeenCalledWith(professor.matricula)
+      expect(res.status).toHaveBeenCalledWith(200)
+      expect(res.json).toHaveBeenCalledWith(ProfessorRespostaMapper.paraRespostaPublica(professor))
+    })
+
+    it('retorna visão pública para professor buscando outro professor', async () => {
+      // Arrange
+      const req = {
+        params: { mat: professor.matricula },
+        user: { email: 'outro@uni.edu', role: 'PROFESSOR' },
+      } as unknown as Request
+      // Act
+      await controller.buscarPorMatricula(req, res)
+      // Assert
+      expect(res.status).toHaveBeenCalledWith(200)
+      expect(res.json).toHaveBeenCalledWith(ProfessorRespostaMapper.paraRespostaPublica(professor))
+    })
+
+    it('retorna visão completa para admin', async () => {
+      // Arrange
+      const req = {
+        params: { mat: professor.matricula },
+        user: { email: 'admin@uni.edu', role: 'ADMIN' },
+      } as unknown as Request
+      // Act
+      await controller.buscarPorMatricula(req, res)
+      // Assert
+      expect(res.status).toHaveBeenCalledWith(200)
+      expect(res.json).toHaveBeenCalledWith(ProfessorRespostaMapper.paraResposta(professor))
+    })
+
+    it('retorna visão completa para o próprio professor', async () => {
+      // Arrange
+      const req = {
+        params: { mat: professor.matricula },
+        user: { email: professor.emailUsuario, role: 'PROFESSOR' },
+      } as unknown as Request
+      // Act
+      await controller.buscarPorMatricula(req, res)
+      // Assert
       expect(res.status).toHaveBeenCalledWith(200)
       expect(res.json).toHaveBeenCalledWith(ProfessorRespostaMapper.paraResposta(professor))
     })
