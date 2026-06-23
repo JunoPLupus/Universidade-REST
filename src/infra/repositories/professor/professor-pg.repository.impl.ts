@@ -112,4 +112,9 @@ export class ProfessorPgRepositoryImpl implements IProfessorRepository {
       this.prisma.usuario.delete({ where: { email: registro.emailUsuario } }),
     ])
   }
+
+  async existeLecionamentoVinculado(matricula: string): Promise<boolean> {
+    const count = await this.prisma.lecionamento.count({ where: { matProfessor: matricula } })
+    return count > 0
+  }
 }

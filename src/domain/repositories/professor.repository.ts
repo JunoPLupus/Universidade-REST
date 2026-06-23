@@ -6,7 +6,7 @@ export interface BuscarProfessorFiltros {
   matricula?: string
   /** Filtra pelo e-mail do usuario vinculado. */
   email?: string
-  /** Filtra pelo nome do usuario vinculado (parcial, sem distinção de maiúsculas). */
+  /** Filtra pelo nome do usuario vinculado (parcial, sem distincao de maiusculas). */
   nome?: string
   /** Filtra pelo CPF do usuario vinculado. */
   cpf?: string
@@ -42,4 +42,7 @@ export interface IProfessorRepository {
    * A ordem de exclusao (professor antes de usuario) respeita a FK.
    */
   excluir(matricula: string): Promise<void>
+
+  /** Verifica se existe algum lecionamento vinculado ao professor informado. */
+  existeLecionamentoVinculado(matricula: string): Promise<boolean>
 }

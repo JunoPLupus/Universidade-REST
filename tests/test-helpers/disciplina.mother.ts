@@ -47,7 +47,8 @@ export class DisciplinaMother {
       cadastrar: jest.fn(),
       editar: jest.fn(),
       excluir: jest.fn(),
-      excluirPorCurso: jest.fn()
+      excluirPorCurso: jest.fn(),
+      existeLecionamentoVinculado: jest.fn(),
     } as unknown as jest.Mocked<IDisciplinaRepository>
   }
 

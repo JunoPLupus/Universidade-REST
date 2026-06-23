@@ -7,6 +7,7 @@ import authRoutes from './http/routes/auth.routes';
 import cursoRoutes from './http/routes/curso.routes';
 import disciplinaRoutes from './http/routes/disciplina.routes';
 import professorRoutes from './http/routes/professor.routes';
+import lecionamentoRoutes from './http/routes/lecionamento.routes';
 
 export function createApp(): Application {
   const app: Express = express()
@@ -24,6 +25,7 @@ export function createApp(): Application {
   app.use('/cursos', cursoRoutes)
   app.use('/disciplinas', disciplinaRoutes)
   app.use('/professores', professorRoutes)
+  app.use('/lecionamentos', lecionamentoRoutes)
 
   app.use(errorHandler)
 
