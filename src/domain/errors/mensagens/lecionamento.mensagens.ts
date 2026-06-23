@@ -16,4 +16,7 @@ export const lecionamentoMensagens = {
 
   professorComLecionamento: (matricula: string): string =>
     `Não é possível excluir o professor '${matricula}' pois ele possui lecionamentos vinculados.`,
+
+  lecionamentoIdentico: (): string =>
+    `Já existe um lecionamento cadastrado com os mesmos dados.`,
 }

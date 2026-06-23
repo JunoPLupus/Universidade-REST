@@ -14,6 +14,7 @@ import { semestreMensagens } from '../../errors/mensagens/semestre.mensagens';
 import { garantirExistencia } from '../utils/garantir-existencia.util';
 import { gerarProximoCodigo } from '../utils/gerar-proximo-codigo.util';
 import { ErroValidacaoError } from '../../errors/erro-validacao.error';
+import { ErroConflitoError } from '../../errors/erro-conflito.error';
 
 /** Regex que valida o formato "AAAA.S" (ex: "2026.2") */
 const REGEX_CODIGO_SEMESTRE = /^(\d{4})\.(1|2)$/
@@ -92,6 +93,17 @@ export class LecionamentoService {
       diaSemana: dto.diaSemana,
     })
 
+    const duplicatas = await this.lecionamentoRepository.buscar({
+      codDisciplina: dto.codDisciplina,
+      matProfessor: dto.matProfessor,
+      codSemestre: dto.codSemestre,
+      turno: dto.turno,
+      diaSemana: dto.diaSemana,
+    })
+    if (duplicatas.length > 0) {
+      throw new ErroConflitoError(lecionamentoMensagens.lecionamentoIdentico())
+    }
+
     await this.lecionamentoRepository.cadastrar(lecionamento)
     return lecionamento
   }
@@ -137,12 +149,10 @@ export class LecionamentoService {
     const turno = dto.turno ?? existente.turno
     const diaSemana = dto.diaSemana ?? existente.diaSemana
 
-    if (dto.codDisciplina && dto.codDisciplina !== existente.codDisciplina) {
-      await garantirExistencia(
-        () => this.disciplinaRepository.buscarPorCodigo(codDisciplina),
-        disciplinaMensagens.naoEncontrada(codDisciplina),
-      )
-    }
+    const disciplina = await garantirExistencia(
+      () => this.disciplinaRepository.buscarPorCodigo(codDisciplina),
+      disciplinaMensagens.naoEncontrada(codDisciplina),
+    )
 
     if (dto.matProfessor && dto.matProfessor !== existente.matProfessor) {
       await garantirExistencia(
@@ -155,8 +165,25 @@ export class LecionamentoService {
       await this.resolverSemestre(codSemestre)
     }
 
+    const duplicatas = await this.lecionamentoRepository.buscar({
+      codDisciplina, matProfessor, codSemestre, turno, diaSemana,
+    })
+    if (duplicatas.some(l => l.codigo !== codigo)) {
+      throw new ErroConflitoError(lecionamentoMensagens.lecionamentoIdentico())
+    }
+
+    const novoPrefixo = `${codSemestre}.${disciplina.codCurso}.`
+    let novoCodigo = codigo
+    if (!codigo.startsWith(novoPrefixo)) {
+      const ultimoCodigo = await this.lecionamentoRepository.buscarUltimoCodigoDoSemestreCurso(
+        codSemestre,
+        disciplina.codCurso,
+      )
+      novoCodigo = gerarProximoCodigo(ultimoCodigo, novoPrefixo)
+    }
+
     const lecionamentoAtualizado = LecionamentoFactory.criar({
-      codigo,
+      codigo: novoCodigo,
       codDisciplina,
       matProfessor,
       codSemestre,
@@ -164,7 +191,7 @@ export class LecionamentoService {
       diaSemana,
     })
 
-    await this.lecionamentoRepository.editar(lecionamentoAtualizado)
+    await this.lecionamentoRepository.editar(codigo, lecionamentoAtualizado)
     return lecionamentoAtualizado
   }
 
