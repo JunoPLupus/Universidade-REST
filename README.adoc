@@ -9,7 +9,7 @@ image:https://img.shields.io/badge/Express-5-grey?logo=express&logoColor=white&l
 image:https://img.shields.io/badge/Prisma-5-grey?logo=prisma&logoColor=white&labelColor=2D3748[Prisma]
 image:https://img.shields.io/badge/PostgreSQL-16-grey?logo=postgresql&logoColor=white&labelColor=4169E1[PostgreSQL]
 
-API REST para gestão de cursos e disciplinas, construída com Node.js, TypeScript, Express e PostgreSQL (via Prisma ORM).
+API REST para gestão de cursos, disciplinas e professores, com autenticação JWT. Construída com Node.js, TypeScript, Express e PostgreSQL (via Prisma ORM).
 
 == Pré-requisitos
 
@@ -97,62 +97,143 @@ npm run test:integration
 npm test
 ----
 
+== Autenticação
+
+A API utiliza JWT (Bearer Token). Obtenha um token via `POST /auth/login` e inclua-o no cabeçalho de cada requisição protegida:
+
+----
+Authorization: Bearer <token>
+----
+
+Níveis de acesso:
+
+[cols="1,3", options="header"]
+|===
+| Nível | Permissões
+
+| *Público*
+| Acesso irrestrito — qualquer cliente pode consultar
+
+| *Autenticado*
+| Requer token JWT válido
+
+| *Admin*
+| Requer token JWT com `role: ADMIN`
+|===
+
 == Endpoints
 
-=== Cursos
-[cols="1,2,2", options="header"]
+=== Auth
+
+[cols="1,2,2,1", options="header"]
 |===
-| Método | Rota | Descrição
+| Método | Rota | Descrição | Acesso
+
+| `POST`
+| `/auth/login`
+| Autenticar e obter token JWT
+| Público
+|===
+
+=== Professores
+
+[cols="1,2,2,1", options="header"]
+|===
+| Método | Rota | Descrição | Acesso
+
+| `GET`
+| `/professores`
+| Listar professores (filtros opcionais)
+| Público
+
+| `GET`
+| `/professores/:mat`
+| Buscar professor por matrícula
+| Público
+
+| `POST`
+| `/professores`
+| Cadastrar professor
+| Admin
+
+| `PATCH`
+| `/professores/:mat`
+| Editar professor (admin edita qualquer; professor edita o próprio)
+| Autenticado
+
+| `DELETE`
+| `/professores/:mat`
+| Excluir professor
+| Admin
+|===
+
+=== Cursos
+
+[cols="1,2,2,1", options="header"]
+|===
+| Método | Rota | Descrição | Acesso
 
 | `GET`
 | `/cursos`
 | Listar cursos (filtros opcionais por nome e código)
+| Público
 
 | `GET`
 | `/cursos/:codigo`
 | Buscar curso por código
+| Público
 
 | `POST`
 | `/cursos`
 | Cadastrar curso
+| Admin
 
 | `PATCH`
 | `/cursos/:codigo`
 | Editar curso (campos opcionais)
+| Admin
 
 | `DELETE`
 | `/cursos/:codigo`
 | Excluir curso
+| Admin
 
 | `DELETE`
 | `/cursos/:codigo/disciplinas`
 | Excluir todas as disciplinas do curso
+| Admin
 |===
 
 === Disciplinas
-[cols="1,2,2", options="header"]
+
+[cols="1,2,2,1", options="header"]
 |===
-| Método | Rota | Descrição
+| Método | Rota | Descrição | Acesso
 
 | `GET`
 | `/disciplinas`
 | Listar disciplinas (filtros opcionais)
+| Público
 
 | `GET`
 | `/disciplinas/:codigo`
 | Buscar disciplina por código
+| Público
 
 | `POST`
 | `/disciplinas`
 | Cadastrar disciplina
+| Admin
 
 | `PATCH`
 | `/disciplinas/:codigo`
 | Editar disciplina (campos opcionais)
+| Admin
 
 | `DELETE`
 | `/disciplinas/:codigo`
 | Excluir disciplina
+| Admin
 |===
 
 Consulte a documentação completa em `/docs` com exemplos de request/response e descrição de todos os erros possíveis.
