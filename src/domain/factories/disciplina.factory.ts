@@ -5,7 +5,7 @@ import { disciplinaMensagens } from '../errors/mensagens/disciplina.mensagens';
 
 const NOME_MIN = 3
 const NOME_MAX = 100
-const PERIODO_MIN = 3
+const PERIODO_MIN = 1
 const CARGA_HORARIA_MIN = 1
 
 /**
@@ -16,7 +16,7 @@ const CARGA_HORARIA_MIN = 1
  * `DisciplinaProps`, validando as invariantes do domínio antes de delegar a
  * criação da entidade para `Disciplina.criarDisciplina`.
  *
- * @throws ErroValidacaoError se `nome` for vazio, `periodo` for menor que 3,
+ * @throws ErroValidacaoError se `nome` for vazio, `periodo` for menor que 1,
  * ou `cargaHoraria` for menor ou igual a zero.
  */
 export class DisciplinaFactory {

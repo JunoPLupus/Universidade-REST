@@ -1,5 +1,5 @@
 import { ErroValidacaoError } from '../errors/erro-validacao.error';
-import { isAbaixoDoLimite, isAcimaDoLimite } from './utils/value-objects.utils';
+import { isAbaixoDoLimite, isAcimaDoLimite, validarTexto as validarTextoUtil } from './utils/value-objects.utils';
 
 /**
  * Classe base para os value objects do domínio.
@@ -22,13 +22,7 @@ export abstract class ValorDominioBase {
    * @throws ErroValidacaoError se o tamanho estiver fora dos limites.
    */
   protected validarTexto(valor: string, mensagemInvalida: string): string {
-    const texto = valor.trim()
-
-    if (isAbaixoDoLimite(texto.length, this.limiteMinimo) || isAcimaDoLimite(texto.length, this.limiteMaximo)) {
-      throw new ErroValidacaoError(mensagemInvalida)
-    }
-
-    return texto
+    return validarTextoUtil(valor, mensagemInvalida, this.limiteMinimo, this.limiteMaximo)
   }
 
   /**

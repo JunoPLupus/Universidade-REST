@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import { cursoController, disciplinaController } from '../../shared/container';
+import { verificarAutenticacao } from '../middlewares/auth/verifica-autenticacao/verifica-autenticacao.middleware';
+import { exigirAdmin } from '../middlewares/auth/exige-admin/exige-admin.middleware';
 
 const cursoRoutes : Router = Router()
 
@@ -139,7 +141,7 @@ cursoRoutes.get('/', cursoController.buscar.bind(cursoController))
  *               $ref: '#/components/schemas/ErroResposta'
  */
 //#endregion
-cursoRoutes.post('/', cursoController.cadastrar.bind(cursoController))
+cursoRoutes.post('/', verificarAutenticacao, exigirAdmin, cursoController.cadastrar.bind(cursoController))
 
 //#region Documentação: get '/cursos/{codigo}'
 /**
@@ -228,7 +230,7 @@ cursoRoutes.get('/:codigo', cursoController.buscarPorCodigo.bind(cursoController
  *               $ref: '#/components/schemas/ErroResposta'
  */
 //#endregion
-cursoRoutes.patch('/:codigo', cursoController.editar.bind(cursoController))
+cursoRoutes.patch('/:codigo', verificarAutenticacao, exigirAdmin, cursoController.editar.bind(cursoController))
 
 //#region Documentação: delete '/cursos/{codigo}'
 /**
@@ -263,7 +265,7 @@ cursoRoutes.patch('/:codigo', cursoController.editar.bind(cursoController))
  *               $ref: '#/components/schemas/ErroResposta'
  */
 //#endregion
-cursoRoutes.delete('/:codigo', cursoController.excluir.bind(cursoController))
+cursoRoutes.delete('/:codigo', verificarAutenticacao, exigirAdmin, cursoController.excluir.bind(cursoController))
 
 //#region Documentação: delete '/cursos/{codigo}/disciplinas'
 /**
@@ -279,19 +281,13 @@ cursoRoutes.delete('/:codigo', cursoController.excluir.bind(cursoController))
  *         name: codigo
  *         required: true
  *         schema:
- *           type: string
- *         example: "001"
- *     responses:
- *       204:
- *         description: Disciplinas removidas com sucesso.
- *       404:
- *         description: Curso não encontrado.
+ *         description: Curso nao encontrado.
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ErroResposta'
  */
 //#endregion
-cursoRoutes.delete('/:codigo/disciplinas', disciplinaController.excluirPorCurso.bind(disciplinaController))
+cursoRoutes.delete('/:codigo/disciplinas', verificarAutenticacao, exigirAdmin, disciplinaController.excluirPorCurso.bind(disciplinaController))
 
 export default cursoRoutes

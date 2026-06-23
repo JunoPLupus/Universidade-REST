@@ -17,9 +17,12 @@ export const prismaTest = new PrismaClient({
  *
  * Deve ser chamada antes de cada teste (`beforeEach`) para garantir que os
  * testes não interfiram entre si. A ordem de exclusão respeita as
- * dependências de chave estrangeira (Disciplina depende de Curso).
+ * dependências de chave estrangeira (Professor depende de Usuario;
+ * Disciplina depende de Curso).
  */
 export async function limparTabelas(): Promise<void> {
+  await prismaTest.professor.deleteMany()
+  await prismaTest.usuario.deleteMany()
   await prismaTest.disciplina.deleteMany()
   await prismaTest.curso.deleteMany()
 }
